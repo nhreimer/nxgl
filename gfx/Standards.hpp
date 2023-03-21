@@ -1,0 +1,7 @@
+#ifndef E898E2A08F0447249D7A4C08867F4ED6
+#define E898E2A08F0447249D7A4C08867F4ED6
+
+#include "standards/Definitions.hpp"
+#include "standards/Clock.hpp"
+
+#endif //E898E2A08F0447249D7A4C08867F4ED6
