@@ -12,8 +12,8 @@ public:
 
   void initialize( ApplicationContext &appCtx, GLFWwindow *window ) override
   {
-    m_innerColorizer.setColors( 3, { 1.f, 0.f, 0.f, 1.f }, { 1.f, 0.f, 1.f, 1.f } );
-    m_outerColorizer.setColors( 3, { 1.f, 0.f, 0.f, 1.f }, { 1.f, 1.f, 0.f, 1.f } );
+    m_innerColorizer.setColors( 12, { 1.f, 0.f, 0.f, 1.f }, { 1.f, 0.f, 1.f, 1.f } );
+    m_outerColorizer.setColors( 12, { 1.f, 0.f, 0.f, 1.f }, { 1.f, 1.f, 0.f, 1.f } );
 
     m_pRectangle = std::make_unique< nxgl::gfx::Rectangle >( GL_DYNAMIC_DRAW );
     m_pRectangle->getModel().setScale( { 100.f, 100.f } );
@@ -30,7 +30,7 @@ public:
     m_pTriangle->setOutlineColor( m_outerColorizer );
     m_pTriangle->setOutlineWidth( .2f );
     m_pTriangle->getModel().setScale( { 100.f, 100.f } );
-    m_pTriangle->getModel().setPosition( { appCtx.windowSize.x / 2.f, appCtx.windowSize.y / 2.f } );
+    m_pTriangle->getModel().setPosition( { appCtx.windowSize.x / 4.f, appCtx.windowSize.y / 4.f } );
 
     auto bounds = m_pTriangle->getModel().getBounds();
     LOG_DEBUG( "bounds: ({}, {}) - ({}, {})", bounds.topLeft.x, bounds.topLeft.y,
@@ -50,7 +50,7 @@ public:
 
   void draw( ApplicationContext &appCtx, GLFWwindow *window ) override
   {
-//    m_pTriangle->draw( appCtx.camera );
+    m_pTriangle->draw( appCtx.camera );
     m_pRectangle->draw( appCtx.camera );
   }
 
@@ -65,7 +65,6 @@ public:
     {
       double xpos, ypos;
       glfwGetCursorPos( window, &xpos, &ypos );
-      // LOG_DEBUG( "CLICKED: {}, {}", xpos, ypos );
       if ( m_pTriangle->getModel().getBounds().contains( { xpos, ypos } ) )
       {
         LOG_DEBUG( "MATCH" );

@@ -12,7 +12,7 @@ class Rectangle : public Shape
 {
 public:
   explicit Rectangle( GLenum drawMode )
-    : Shape( drawMode, 12, ( GLData * )m_vertices )
+    : Shape( drawMode, 24, ( GLData * )m_vertices )
   {}
 
   void draw( const GLCamera& camera )
@@ -23,8 +23,7 @@ public:
     // transform & draw the OUTLINE
     auto outlineTransform = getModel().getTranslation( camera );
     setMVP( outlineTransform );
-    GLExec( glDrawArrays( GL_TRIANGLES, 0, 3 ) );
-    GLExec( glDrawArrays( GL_TRIANGLES, 3, 3 ) );
+    GLExec( glDrawArrays( GL_TRIANGLE_FAN, 0, 12 ) );
 
     auto outlinePosition = getModel().getPosition();
 
@@ -41,30 +40,27 @@ public:
     auto fillTransform = m_innerTransform.getTranslation( camera );
     setMVP( fillTransform );
 
-    GLExec( glDrawArrays( GL_TRIANGLES, 6, 3 ) );
-    GLExec( glDrawArrays( GL_TRIANGLES, 9, 3 ) );
+    GLExec( glDrawArrays( GL_TRIANGLES, 12, 12 ) );
   }
 
   void setFillColor( IColorable& colorizer )
   {
-    setColor( 6, colorizer( 0 ) );
-    setColor( 7, colorizer( 1 ) );
-    setColor( 8, colorizer( 2 ) );
-
-    setColor( 9, colorizer( 3 ) );
-    setColor( 10, colorizer( 4 ) );
-    setColor( 11, colorizer( 5 ) );
+    for ( int vertexIndex = 12, colorIndex = 0;
+          colorIndex < 12;
+          ++vertexIndex, ++colorIndex )
+    {
+      setColor( vertexIndex, colorizer( colorIndex ) );
+    }
   }
 
   void setOutlineColor( IColorable& colorizer )
   {
-    setColor( 0, colorizer( 0 ) );
-    setColor( 1, colorizer( 1 ) );
-    setColor( 2, colorizer( 2 ) );
-
-    setColor( 3, colorizer( 3 ) );
-    setColor( 4, colorizer( 4 ) );
-    setColor( 5, colorizer( 5 ) );
+    for ( int vertexIndex = 0, colorIndex = 0;
+          colorIndex < 12;
+          ++vertexIndex, ++colorIndex )
+    {
+      setColor( vertexIndex, colorizer( colorIndex ) );
+    }
   }
 
   void setOutlineWidth( float percentage )
@@ -86,26 +82,44 @@ private:
   // primary model. it copies everything from the primary over, except the scale
   nxgl::gfx::GLModel m_innerTransform;
 
-  static const inline GLData m_vertices[ 12 ] =
+  static const inline GLData m_vertices[ 24 ] =
   {
     // counterclockwise, starting from bottom-left position A (right triangle)
-    // x, y                   r, g, b, a
-    { { -1.f,      -1.f  }, { 1.f, 1.f, 1.f, 1.f } }, // A (bottom left)
-    { {  1.f,      -1.f  }, { 1.f, 1.f, 1.f, 1.f } }, // B (bottom right)
-    { { -1.f,       1.f  }, { 1.f, 1.f, 1.f, 1.f } }, // C (top left)
+    //   x, y            r, g, b, a
+    { {  0.f,   0.f }, { 1.f, 1.f, 1.f, 1.f } },  // A
+    { {  1.f,   1.f }, { 1.f, 1.f, 1.f, 1.f } },  // B
+    { { -1.f,   1.f }, { 1.f, 1.f, 1.f, 1.f } },  // C
 
-    { {  1.f,      -1.f  }, { 1.f, 1.f, 1.f, 1.f } }, // B (bottom right)
-    { {  1.f,       1.f  }, { 1.f, 1.f, 1.f, 1.f } }, // D (top right)
-    { { -1.f,       1.f  }, { 1.f, 1.f, 1.f, 1.f } }, // C (top left)
+    { {  0.f,   0.f }, { 1.f, 1.f, 1.f, 1.f } },  // A
+    { { -1.f,   1.f }, { 1.f, 1.f, 1.f, 1.f } },  // C
+    { { -1.f,  -1.f }, { 1.f, 1.f, 1.f, 1.f } },  // D
 
-    // x, y                   r, g, b, a
-    { { -1.f,      -1.f  }, { 1.f, 1.f, 1.f, 1.f } }, // A (bottom left)
-    { {  1.f,      -1.f  }, { 1.f, 1.f, 1.f, 1.f } }, // B (bottom right)
-    { { -1.f,       1.f  }, { 1.f, 1.f, 1.f, 1.f } }, // C (top left)
+    { {  0.f,   0.f }, { 1.f, 1.f, 1.f, 1.f } },  // A
+    { { -1.f,  -1.f }, { 1.f, 1.f, 1.f, 1.f } },  // D
+    { {  1.f,  -1.f }, { 1.f, 1.f, 1.f, 1.f } },  // E
 
-    { {  1.f,      -1.f  }, { 1.f, 1.f, 1.f, 1.f } }, // B (bottom right)
-    { {  1.f,       1.f  }, { 1.f, 1.f, 1.f, 1.f } }, // D (top right)
-    { { -1.f,       1.f  }, { 1.f, 1.f, 1.f, 1.f } }  // C (top left)
+    { {  0.f,   0.f }, { 1.f, 1.f, 1.f, 1.f } },  // A
+    { {  1.f,  -1.f }, { 1.f, 1.f, 1.f, 1.f } },  // E
+    { {  1.f,   1.f }, { 1.f, 1.f, 1.f, 1.f } },  // B
+
+    //////////////////////////////////////////////////
+
+    //   x, y            r, g, b, a
+    { {  0.f,   0.f }, { 1.f, 1.f, 1.f, 1.f } },  // A
+    { {  1.f,   1.f }, { 1.f, 1.f, 1.f, 1.f } },  // B
+    { { -1.f,   1.f }, { 1.f, 1.f, 1.f, 1.f } },  // C
+
+    { {  0.f,   0.f }, { 1.f, 1.f, 1.f, 1.f } },  // A
+    { { -1.f,   1.f }, { 1.f, 1.f, 1.f, 1.f } },  // C
+    { { -1.f,  -1.f }, { 1.f, 1.f, 1.f, 1.f } },  // D
+
+    { {  0.f,   0.f }, { 1.f, 1.f, 1.f, 1.f } },  // A
+    { { -1.f,  -1.f }, { 1.f, 1.f, 1.f, 1.f } },  // D
+    { {  1.f,  -1.f }, { 1.f, 1.f, 1.f, 1.f } },  // E
+
+    { {  0.f,   0.f }, { 1.f, 1.f, 1.f, 1.f } },  // A
+    { {  1.f,  -1.f }, { 1.f, 1.f, 1.f, 1.f } },  // E
+    { {  1.f,   1.f }, { 1.f, 1.f, 1.f, 1.f } }   // B
   };
 };
 
