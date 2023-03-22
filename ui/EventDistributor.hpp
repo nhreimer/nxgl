@@ -131,12 +131,17 @@ public:
       eventReceivers->processMouseClickEvent( appCtx, window, button, action, mods );
   }
 
-  void processMouseMoveEvent( GLFWwindow* window, double xpos, double ypos ) override
+  void processMouseMoveEvent( ApplicationContext& appCtx, GLFWwindow* window, double xpos, double ypos ) override
   {}
 
-  void processMouseScrollEvent( GLFWwindow* window, double xoffset, double yoffset ) override
+  void processMouseScrollEvent( ApplicationContext& appCtx, GLFWwindow* window, double xoffset, double yoffset ) override
   {}
 
+  void processWindowMoveEvent( ApplicationContext& appCtx, GLFWwindow* window, double xpos, double ypos ) override
+  {
+    for ( auto& eventReceivers : m_eventReceivers )
+      eventReceivers->processWindowMoveEvent( appCtx, window, xpos, ypos );
+  }
 
 private:
   ImguiWrapperReceiver m_imguiWrapperReceiver;

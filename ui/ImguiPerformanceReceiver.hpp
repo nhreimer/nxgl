@@ -4,11 +4,10 @@
 namespace nxgl::ui
 {
 
-/***
- * call this BEFORE other imgui windows to enable window docking
- */
-struct ImguiPerformanceReceiver : public EventReceiver
+class ImguiPerformanceReceiver : public EventReceiver
 {
+public:
+
   void update( ApplicationContext& appCtx,
                GLFWwindow* window,
                const nxTimePoint frameDeltaInMS ) override
@@ -18,7 +17,7 @@ struct ImguiPerformanceReceiver : public EventReceiver
 
     ImGui::Begin( "Performance" );
     {
-      ImGui::Text( "This is some useful text." );               // Display some text (you can use a format strings too)
+      ImGui::Text( "Performance Metrics" );               // Display some text (you can use a format strings too)
 
       ImGui::SliderFloat( "float", &f, 0.0f, 1.0f );            // Edit 1 float using a slider from 0.0f to 1.0f
       //ImGui::ColorEdit3( "clear color", ( float* )&clearColor ); // Edit 3 floats representing a color
@@ -32,6 +31,26 @@ struct ImguiPerformanceReceiver : public EventReceiver
     }
     ImGui::End();
   }
+
+private:
+
+  void drawBoundingBox( ApplicationContext& appCtx,
+                        GLFWwindow* window )
+  {
+    int xpos, ypos;
+    glfwGetWindowPos( window, &xpos, &ypos );
+    ImVec2 winPos = { ( float )xpos, ( float )ypos };
+
+    auto * pDrawList = ImGui::GetBackgroundDrawList();
+    auto winSize = appCtx.windowSize;
+//    pDrawList->AddRect( { winPos.x, winPos.y },
+//                        { winPos.x + 200.f, winPos.y + 200.f },
+//                        ImColor( 0.f, 1.f, 0.f, 1.f ) );
+      pDrawList->AddRect( { winPos.x + winSize.x / 2.f, winPos.y + winSize.y / 2.f },
+                          { winPos.x + winSize.x / 2.f + 100.f, winPos.y + winSize.y / 2.f + 100.f },
+                          ImColor( 0.f, 1.f, 0.f, 1.f ) );
+  }
+
 };
 
 }

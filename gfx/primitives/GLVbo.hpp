@@ -39,7 +39,7 @@ public:
   /// \param bufferUsage GL_DYNAMIC_DRAW, GL_STATIC_DRAW, etc.
   /// \param elementCount number of elements in the buffer
   /// \param pReadBuffer the buffer to copy into the VBO
-  GLVbo( GLenum bufferUsage, GLsizeiptr elementCount, TData * pReadBuffer )
+  GLVbo( GLenum bufferUsage, GLsizeiptr elementCount, const TData * pReadBuffer )
     : m_bufferUsage( bufferUsage ),
       m_size( elementCount * sizeof( TData ) )
   {

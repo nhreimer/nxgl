@@ -26,6 +26,7 @@ public:
     glfwSetKeyCallback( m_pWindow, onGlfwKeyEvent );
     glfwSetMouseButtonCallback( m_pWindow, onGlfwMouseClick );
     glfwSetWindowSizeCallback( m_pWindow, onGlfwResize );
+    glfwSetWindowPosCallback( m_pWindow, onGlfwWindowMove );
 
     // register the following event receivers
   }
@@ -139,6 +140,24 @@ private:
 
     // update the resolution in the application
     pApplication->m_appCtx.windowSize = { width, height };
+  }
+
+  ////////////////////////////////////////////////////////////////////////////////
+  /// PRIVATE:
+  ///
+  /// update application context when window moves
+  /// \param window
+  /// \param width
+  /// \param height
+  static void onGlfwWindowMove( GLFWwindow* window, int width, int height )
+  {
+    auto * pApplication = ( Application * )glfwGetWindowUserPointer( window );
+    assert( pApplication != nullptr );
+    pApplication->m_appCtx.eventDistributor->processWindowMoveEvent(
+      pApplication->m_appCtx,
+      window,
+      width,
+      height );
   }
 
 private:

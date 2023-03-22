@@ -9,6 +9,7 @@
 #include "ui/ImguiDockProviderReceiver.hpp"
 #include "ui/ImguiPerformanceReceiver.hpp"
 #include "ui/ImguiMainWindowReceiver.hpp"
+#include "ui/ImguiPropertiesReceiver.hpp"
 
 static GLFWwindow * createWindow(
   uint32_t width,
@@ -78,7 +79,7 @@ static void runLoop( GLFWwindow * pWindow, const nxgl::gfx::GLCamera& camera )
   nxgl::gfx::SpectrumColorizer spectrumColorizer;
   spectrumColorizer.setColors( 3, { 1.f, 0.f, 0.f, 1.f }, { 0.f, 0.f, 1.f, 1.f } );
 
-  nxgl::gfx::Triangle triangle2( GL_STATIC_DRAW );
+  nxgl::gfx::Triangle triangle2( GL_DYNAMIC_DRAW );
   triangle2.setOutlineWidth( .5f );
   triangle2.getModel().setPosition( { 320.f, 384.f / 2.f } );
   triangle2.getModel().setScale( { 50.f, 50.f } );
@@ -115,12 +116,15 @@ int main()
 {
   nxgl::SLog::initializeConsole();
 
+  std::vector< std::pair< std::string, float > > metrics;
+
   std::vector< nxgl::ui::EventReceiver * > distributors
     {
       // must appear before other windows that should be dockable
-      new nxgl::ui::ImguiDockProviderReceiver(),
+//      new nxgl::ui::ImguiDockProviderReceiver(),
+      new nxgl::ui::ImguiMainWindowReceiver(),
       new nxgl::ui::ImguiPerformanceReceiver(),
-      new nxgl::ui::ImguiMainWindowReceiver()
+      new nxgl::ui::ImguiPropertiesReceiver()
     };
 
   nxgl::ui::EventDistributor eventDistributor( distributors );

@@ -30,7 +30,8 @@ public:
 
     auto outlinePosition = getModel().getPosition();
 
-    // scale down the inner shape
+    // scale down the inner shape, so it fits inside the overall size
+    // we NEVER extend beyond the specified size
     m_innerTransform = getModel();
     m_innerTransform.setScale(
       {

@@ -51,9 +51,11 @@ struct EventReceiver
     int action,
     int mods ) {}
 
-    virtual void processMouseMoveEvent( GLFWwindow* window, double xpos, double ypos ) {}
+  virtual void processMouseMoveEvent( ApplicationContext& appCtx, GLFWwindow* window, double xpos, double ypos ) {}
 
-    virtual void processMouseScrollEvent( GLFWwindow* window, double xoffset, double yoffset ) {}
+  virtual void processMouseScrollEvent( ApplicationContext& appCtx, GLFWwindow* window, double xoffset, double yoffset ) {}
+
+  virtual void processWindowMoveEvent( ApplicationContext& appCtx, GLFWwindow* window, double xpos, double ypos ) {}
 
 };
 
