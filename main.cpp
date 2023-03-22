@@ -3,6 +3,7 @@
 #include "Standards.hpp"
 #include "gfx/Primitives.hpp"
 #include "gfx/shapes/Triangle.hpp"
+#include "gfx/shapes/Rectangle.hpp"
 
 #include "Application.hpp"
 
@@ -120,6 +121,7 @@ int main()
 
   std::vector< nxgl::ui::EventReceiver * > distributors
     {
+      // TODO: the ordering of these must change once docking is enabled
       // must appear before other windows that should be dockable
 //      new nxgl::ui::ImguiDockProviderReceiver(),
       new nxgl::ui::ImguiMainWindowReceiver(),

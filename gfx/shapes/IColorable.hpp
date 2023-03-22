@@ -36,7 +36,11 @@ class SpectrumColorizer : public IColorable
 {
 public:
 
-  void setColors( uint32_t intervals,
+  ///
+  /// \param intervals the number of colors to bounce between on the spectrum of start and end.
+  /// \param startColor the start of the spectrum
+  /// \param endColor the end of the spectrum
+  void setColors( uint32_t intervals, // this does NOT refer to the number of vertices
                   const nxColor& startColor,
                   const nxColor& endColor )
   {
@@ -48,14 +52,18 @@ public:
     m_deltaColor = endColor - startColor;
   }
 
+  void setIntervals( uint32_t intervals )
+  {
+    assert( intervals > 2 );
+    m_intervals = intervals;
+  }
+
   nxgl::nxColor operator()( uint32_t index ) override
   {
-    assert( index < m_intervals );
-
     if ( index == 0 ) return m_startColor;
     if ( index == m_intervals - 1 ) return m_endColor;
 
-    auto percentage = ( float )index / ( float )m_intervals;
+    auto percentage = ( float )( index % m_intervals ) / ( float )m_intervals;
 
     return { m_deltaColor.r * percentage + m_startColor.r,
              m_deltaColor.g * percentage + m_startColor.g,
