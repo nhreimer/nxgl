@@ -59,7 +59,6 @@ public:
     }
 
     eventDistributor->shutdown( m_appCtx, m_pWindow );
-    glfwTerminate();
   }
 
 private:

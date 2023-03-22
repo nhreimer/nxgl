@@ -5,8 +5,10 @@
 #include "gfx/shapes/Triangle.hpp"
 
 #include "Application.hpp"
+
 #include "ui/ImguiDockProviderReceiver.hpp"
 #include "ui/ImguiPerformanceReceiver.hpp"
+#include "ui/ImguiMainWindowReceiver.hpp"
 
 static GLFWwindow * createWindow(
   uint32_t width,
@@ -117,7 +119,8 @@ int main()
     {
       // must appear before other windows that should be dockable
       new nxgl::ui::ImguiDockProviderReceiver(),
-      new nxgl::ui::ImguiPerformanceReceiver()
+      new nxgl::ui::ImguiPerformanceReceiver(),
+      new nxgl::ui::ImguiMainWindowReceiver()
     };
 
   nxgl::ui::EventDistributor eventDistributor( distributors );
@@ -136,10 +139,11 @@ int main()
 
   // runLoop( pWindow, camera );
 
-  glfwTerminate();
-
+  // delete BEFORE glfw terminates
   for ( auto * pEventReceiver : distributors )
     delete pEventReceiver;
+
+  glfwTerminate();
 
   return 0;
 }

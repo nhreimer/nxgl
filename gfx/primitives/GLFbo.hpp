@@ -1,7 +1,7 @@
 #ifndef DF61045CC5844B0CB85814A109AFB9FE
 #define DF61045CC5844B0CB85814A109AFB9FE
 
-namespace ngxl::gfx
+namespace nxgl::gfx
 {
 class GLFbo
 {
