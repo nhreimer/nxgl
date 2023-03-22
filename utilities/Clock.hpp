@@ -7,20 +7,21 @@ using namespace std::chrono;
 
 namespace nxgl
 {
+
 class Clock
 {
 public:
 
   Clock() = default;
 
-  float reset()
+  [[maybe_unused]] float reset()
   {
     auto result = getMilliseconds();
     m_lastMeasurement = high_resolution_clock::now();
     return result;
   }
 
-  [[nodiscard]] inline float getMilliseconds() const
+  [[nodiscard]] inline nxTimePoint getMilliseconds() const
   {
     return duration< float, std::milli >(
       high_resolution_clock::now() -

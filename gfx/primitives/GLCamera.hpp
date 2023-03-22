@@ -1,7 +1,7 @@
 #ifndef INC_7A83510106DD4BF5A11FC674784F9806
 #define INC_7A83510106DD4BF5A11FC674784F9806
 
-#include "gfx/standards/Definitions.hpp"
+#include "utilities/Definitions.hpp"
 
 namespace nxgl::gfx
 {

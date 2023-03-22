@@ -8,6 +8,8 @@ typedef glm::vec4 nxColor;
 
 typedef glm::vec4 nxVec4;
 typedef glm::vec3 nxVec3;
+
+typedef float nxTimePoint;
 }
 
 #endif //A94932B275BE4A84A2ACBB1363AE5C4C

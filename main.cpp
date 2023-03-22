@@ -1,10 +1,12 @@
 #include "Pch.hpp"
 
-#include "gfx/Standards.hpp"
+#include "Standards.hpp"
 #include "gfx/Primitives.hpp"
 #include "gfx/shapes/Triangle.hpp"
 
 #include "Application.hpp"
+#include "ui/ImguiDockProviderReceiver.hpp"
+#include "ui/ImguiPerformanceReceiver.hpp"
 
 static GLFWwindow * createWindow(
   uint32_t width,
@@ -111,13 +113,33 @@ int main()
 {
   nxgl::SLog::initializeConsole();
 
-  nxgl::nxVec2 windowSize { 1280.f, 768.f };
-  nxgl::gfx::GLCamera camera;
-  camera.setProjection( windowSize );
+  std::vector< nxgl::ui::EventReceiver * > distributors
+    {
+      // must appear before other windows that should be dockable
+      new nxgl::ui::ImguiDockProviderReceiver(),
+      new nxgl::ui::ImguiPerformanceReceiver()
+    };
 
-  auto * pWindow = createWindow( ( uint32_t )windowSize.x, ( uint32_t )windowSize.y, "nxgl" );
-  runLoop( pWindow, camera );
+  nxgl::ui::EventDistributor eventDistributor( distributors );
+  nxgl::ApplicationContext appCtx;
+  appCtx.windowSize = { 1280.f, 768.f };
+  appCtx.camera.setProjection( appCtx.windowSize );
+  appCtx.eventDistributor = &eventDistributor;
+
+  auto * pWindow = createWindow(
+    ( uint32_t )appCtx.windowSize.x,
+    ( uint32_t )appCtx.windowSize.y,
+    "nxgl" );
+
+  nxgl::Application application( appCtx, pWindow );
+  application.run();
+
+  // runLoop( pWindow, camera );
+
   glfwTerminate();
+
+  for ( auto * pEventReceiver : distributors )
+    delete pEventReceiver;
 
   return 0;
 }

@@ -1,7 +1,7 @@
 #ifndef C3E093397F0D459E9EDA3D980D03D307
 #define C3E093397F0D459E9EDA3D980D03D307
 
-#include "gfx/standards/Definitions.hpp"
+#include "utilities/Definitions.hpp"
 
 namespace nxgl::gfx
 {

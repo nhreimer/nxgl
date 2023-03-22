@@ -1,7 +1,7 @@
 #ifndef INC_6A261559B4B647AA89872B03F693AA58
 #define INC_6A261559B4B647AA89872B03F693AA58
 
-#include "gfx/standards/Definitions.hpp"
+#include "utilities/Definitions.hpp"
 
 namespace nxgl::gfx
 {

@@ -1,7 +1,7 @@
 #ifndef D46AD6314A0C457CA536F466A8EAF4CD
 #define D46AD6314A0C457CA536F466A8EAF4CD
 
-#include "gfx/standards/Definitions.hpp"
+#include "utilities/Definitions.hpp"
 
 namespace nxgl::gfx
 {
