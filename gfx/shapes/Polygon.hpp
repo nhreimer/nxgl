@@ -27,19 +27,6 @@ public:
     createVertices( m_edges );
   }
 
-//  Polygon( GLenum bufferUsage, uint32_t elements )
-//    : m_vbo( bufferUsage, ( GLsizeiptr )( elements * 2 ), nullptr ),
-//      m_fillBufferStartIndex( elements ),
-//      m_edges( elements / 3 )
-//  {
-//    assert( elements > 2 );
-//
-//    m_vao.registerVBO( m_vbo );
-//
-//    // create the vertices according to a circular pattern
-//    createVertices( m_edges );
-//  }
-
   void draw( const ApplicationContext& appCtx, GLFWwindow *window )
   {
     bind();               // bind ourselves
@@ -132,10 +119,12 @@ private:
       auto thirdPointAngle = ( float )( i + 1 ) * angle;
       nxgl::nxVec2 pointC { std::cos( thirdPointAngle ), std::sin( thirdPointAngle ) };
 
+      // assign the outline shape
       m_vbo.setData( posInBuffer + 0, { pointA, white } );
       m_vbo.setData( posInBuffer + 1, { pointB, white } );
       m_vbo.setData( posInBuffer + 2, { pointC, white } );
 
+      // assign the fill shape
       m_vbo.setData( posInBuffer + m_fillBufferStartIndex, { pointA, white } );
       m_vbo.setData( posInBuffer + m_fillBufferStartIndex + 1, { pointB, white } );
       m_vbo.setData( posInBuffer + m_fillBufferStartIndex + 2, { pointC, white } );

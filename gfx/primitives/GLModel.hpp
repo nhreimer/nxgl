@@ -91,7 +91,7 @@ private:
   /// sets the bounds around the object based on the scale and position
   void setBounds()
   {
-    m_bounds.topLeft = m_position;
+    m_bounds.topLeft = m_position - m_scale;
     m_bounds.bottomRight = m_position + m_scale;
   }
 

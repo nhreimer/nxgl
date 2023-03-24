@@ -3,9 +3,14 @@
 
 namespace nxgl::gfx
 {
+// visit the following site for online testing
+// https://www.andersriggelsen.dk/glblendfunc.php
 struct GLBlend
 {
   bool isEnabled{ false };
+
+  // indicates to use the blendColor option
+  bool useBlendColor{ false };
 
   GLenum srcColor{ GL_ONE };
   GLenum srcAlpha{ GL_ONE };
@@ -15,7 +20,9 @@ struct GLBlend
   GLenum equationColor{ GL_FUNC_ADD };
   GLenum equationAlpha{ GL_FUNC_ADD };
 
-  void blend()
+  nxColor blendColor { 1.f, 1.f, 1.f, 1.f };
+
+  void blend() const
   {
     if ( isEnabled )
     {
@@ -28,6 +35,9 @@ struct GLBlend
 
       glBlendEquationSeparate( equationColor,
                                equationAlpha );
+
+      if ( useBlendColor )
+        glBlendColor( blendColor.r, blendColor.g, blendColor.b, blendColor.a );
     }
   }
 };

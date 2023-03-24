@@ -2,10 +2,11 @@
 #define D49F5B9FB4E9483C8DE2C0371A3E5B3D
 
 #include "gfx/primitives/GLFbo.hpp"
+
 #include "gfx/shapes/IMVPApplicator.hpp"
-#include "gfx/shapes/Polygon.hpp"
-#include "gfx/shapes/Shapes.hpp"
 #include "gfx/shapes/IColorable.hpp"
+
+#include "gfx/shapes/Polygon.hpp"
 
 namespace nxgl::ui
 {
@@ -25,9 +26,20 @@ public:
 
     m_polygon.getModel().setScale( { 100.f, 100.f } );
     m_polygon.getModel().setPosition( { appCtx.windowSize.x / 2.f, appCtx.windowSize.y / 2.f } );
-    m_polygon.setOutlineWidth( .2f );
+    m_polygon.setOutlineWidth( .15f );
     m_polygon.setFillColor( innerColorizer );
     m_polygon.setOutlineColor( outerColorizer );
+
+    ////////////////////////////////////////////////////////////////////////////////
+
+    m_hexa.getModel().setScale( { 100.f, 100.f } );
+    m_hexa.getModel().setPosition( { appCtx.windowSize.x / 2.f - 100.f,
+                                     appCtx.windowSize.y / 2.f - 100.f } );
+    m_hexa.setOutlineWidth( .2f );
+    m_hexa.setOutlineColor( innerColorizer );
+    m_hexa.setFillColor( outerColorizer );
+    m_hexa.getBlend().isEnabled = true;
+    m_hexa.getBlend().destColor = GL_ONE_MINUS_SRC_COLOR;
   }
 
   void update( ApplicationContext &appCtx, GLFWwindow *window, const nxTimePoint frameDeltaInMS ) override
@@ -35,7 +47,8 @@ public:
     m_timer += frameDeltaInMS;
     if ( m_timer >= 100.f )
     {
-      m_polygon.getModel().setAngle( m_polygon.getModel().getAngle() + 1.f );
+      m_polygon.getModel().setAngle( m_polygon.getModel().getAngle() - 1.f );
+      m_hexa.getModel().setAngle( m_hexa.getModel().getAngle() + 1.f );
       m_timer = 0.f;
     }
   }
@@ -43,6 +56,7 @@ public:
   void draw( ApplicationContext &appCtx, GLFWwindow *window ) override
   {
     m_polygon.draw( appCtx, window );
+    m_hexa.draw( appCtx, window );
   }
 
   void
@@ -66,10 +80,8 @@ public:
 private:
 
   float m_timer { 0.f };
-  nxgl::gfx::Rectangle m_polygon { GL_DYNAMIC_DRAW };
-//  nxgl::gfx::Triangle m_polygon { GL_DYNAMIC_DRAW };
-//  nxgl::gfx::Polygon m_polygon { GL_DYNAMIC_DRAW, 12 };
-//  nxgl::gfx::Rectangle m_rect { GL_DYNAMIC_DRAW };
+  nxgl::gfx::Polygon m_polygon { GL_DYNAMIC_DRAW, 4 };
+  nxgl::gfx::Polygon m_hexa { GL_DYNAMIC_DRAW, 6 };
 
 };
 
