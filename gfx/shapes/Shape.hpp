@@ -9,18 +9,20 @@
 namespace nxgl::gfx
 {
 
+// DEPRECATED
 class Shape : public GLObject
 {
 public:
 
   Shape() = delete;
 
-  Shape( GLenum drawMode, GLsizeiptr vertices, GLData * ptrData )
+  Shape( GLenum drawMode, GLsizeiptr vertices, const GLData * ptrData )
     : GLObject(),
       m_vbo( drawMode, vertices, ptrData )
   {
-    // indicate
-    setVBO( m_vbo );
+    // if it's nullptr then it's up to the client to correctly call setVBO
+    if ( ptrData != nullptr )
+      setVBO( m_vbo );
   }
 
   ~Shape() override = default;

@@ -47,6 +47,7 @@ public:
   /// \param vbo
   void registerVBO( const GLVbo< GLData >& vbo )
   {
+    LOG_DEBUG( "VAO attempting to register VBO {}", vbo.id() );
     assert( m_arrayCount == 0 );
 
     // this is also included in GLData.hpp
@@ -54,13 +55,13 @@ public:
     //  _________________________________________________
     // |_________________________________________________|
     // |          VERTEX BUFFER OBJECT LAYOUT            |
-    // |-------------------------------------------------|
+    // |-----------------------|-------------------------|
     // |       GLData 0        |        GLData 1         | ...
-    // |-------------------------------------------------|
+    // |-------|---------------|-------|-----------------|
     // | POS 0 |    COLOR 0    | POS 1 |     COLOR 1     | ...
-    // |-------------------------------------------------|
+    // |-------|---------------|-------|-----------------|
     // | x | y | r | g | b | a | x | y | r | g |  b |  a | ...
-    // |-------------------------------------------------|
+    // |-------|---------------|-------|-----------------|
 
     // ensure that the VAO is selected PRIOR to adding elements to it
     bind();
@@ -88,6 +89,8 @@ public:
     GLExec( glEnableVertexAttribArray( m_arrayCount ) );
 
     ++m_arrayCount;
+
+    LOG_DEBUG( "VAO registered VBO {}", vbo.id() );
   }
 
   ////////////////////////////////////////////////////////////////////////////////

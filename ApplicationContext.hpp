@@ -6,6 +6,11 @@ namespace nxgl::ui
   class EventDistributor;
 }
 
+namespace nxgl::gfx
+{
+  struct IMVPApplicator;
+}
+
 namespace nxgl
 {
 
@@ -14,9 +19,19 @@ namespace nxgl
  */
 struct ApplicationContext
 {
+  // the size of the window. do not cache it because it will be updated as the window changs.
   nxgl::nxVec2 windowSize;
+
+  // this is the project and view. it needs to be combined with a model and then
+  // applied to an object via the IMVPApplicator
   nxgl::gfx::GLCamera camera;
+
+  // this is the event distributor. it can be used to remove or add additional event receivers
   nxgl::ui::EventDistributor * eventDistributor { nullptr };
+
+  // this applies the model, view, projection to an object.
+  // this should either be a shader or transform that actually applies it when drawing
+  nxgl::gfx::IMVPApplicator * mvpApplicator { nullptr };
 };
 
 }

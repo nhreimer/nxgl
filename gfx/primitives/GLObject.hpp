@@ -6,6 +6,7 @@
 namespace nxgl::gfx
 {
 
+// DEPRECATED
 class GLObject
 {
 

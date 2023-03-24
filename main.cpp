@@ -2,8 +2,6 @@
 
 #include "Standards.hpp"
 #include "gfx/Primitives.hpp"
-#include "gfx/shapes/Triangle.hpp"
-#include "gfx/shapes/Rectangle.hpp"
 
 #include "Application.hpp"
 
@@ -11,6 +9,7 @@
 #include "ui/ImguiPerformanceReceiver.hpp"
 #include "ui/ImguiMainWindowReceiver.hpp"
 #include "ui/ImguiPropertiesReceiver.hpp"
+#include "gfx/shapes/ShapeShader.hpp"
 
 static GLFWwindow * createWindow(
   uint32_t width,
@@ -66,59 +65,12 @@ static GLFWwindow * createWindow(
   return ptrWindow;
 }
 
-static void runLoop( GLFWwindow * pWindow, const nxgl::gfx::GLCamera& camera )
+// this function scopes all GLFW and opengl to this function, so that
+// cleanup occurs PRIOR to context termination
+static void runApplication( uint32_t width,       // initial width
+                            uint32_t height,      // initial height
+                            GLFWwindow * pWindow )
 {
-  nxgl::gfx::SolidColorizer solidColorizer;
-  solidColorizer.setColor( { 0.f, 1.f, 0.f, 1.f } );
-
-  nxgl::gfx::Triangle triangle( GL_DYNAMIC_DRAW );
-  triangle.setOutlineWidth( .2f );
-  triangle.getModel().setPosition( { 640.f, 384.f } );
-  triangle.getModel().setScale( { 100.f, 100.f } );
-  triangle.setFillColor( solidColorizer );
-
-  nxgl::gfx::SpectrumColorizer spectrumColorizer;
-  spectrumColorizer.setColors( 3, { 1.f, 0.f, 0.f, 1.f }, { 0.f, 0.f, 1.f, 1.f } );
-
-  nxgl::gfx::Triangle triangle2( GL_DYNAMIC_DRAW );
-  triangle2.setOutlineWidth( .5f );
-  triangle2.getModel().setPosition( { 320.f, 384.f / 2.f } );
-  triangle2.getModel().setScale( { 50.f, 50.f } );
-  triangle2.setFillColor( spectrumColorizer );
-
-  nxgl::Clock timer;
-
-  while ( !glfwWindowShouldClose( pWindow ) )
-  {
-    // Poll for and process events
-    glfwPollEvents();
-
-    int width, height;
-    glfwGetFramebufferSize( pWindow, &width, &height );
-    glViewport( 0, 0, width, height );
-    glClearColor( 0.15f, 0.15f, 0.15f, 1.f );
-    glClear( GL_COLOR_BUFFER_BIT );
-
-    if ( timer.getMilliseconds() >= 500.f )
-    {
-      triangle.getModel().setAngle( triangle.getModel().getAngle() + 5.f );
-      timer.reset();
-    }
-
-    triangle.draw( camera );
-    triangle2.draw( camera );
-
-    // Swap front and back buffers, i.e., display
-    glfwSwapBuffers( pWindow );
-  }
-}
-
-int main()
-{
-  nxgl::SLog::initializeConsole();
-
-  std::vector< std::pair< std::string, float > > metrics;
-
   std::vector< nxgl::ui::EventReceiver * > distributors
     {
       // TODO: the ordering of these must change once docking is enabled
@@ -130,25 +82,32 @@ int main()
     };
 
   nxgl::ui::EventDistributor eventDistributor( distributors );
+  nxgl::gfx::ShapeShader defaultShader;
+
   nxgl::ApplicationContext appCtx;
-  appCtx.windowSize = { 1280.f, 768.f };
+
+  appCtx.windowSize = { ( float )width, ( float )height };
   appCtx.camera.setProjection( appCtx.windowSize );
   appCtx.eventDistributor = &eventDistributor;
-
-  auto * pWindow = createWindow(
-    ( uint32_t )appCtx.windowSize.x,
-    ( uint32_t )appCtx.windowSize.y,
-    "nxgl" );
+  appCtx.mvpApplicator = ( nxgl::gfx::IMVPApplicator * )&defaultShader;
 
   nxgl::Application application( appCtx, pWindow );
   application.run();
 
-  // runLoop( pWindow, camera );
-
   // delete BEFORE glfw terminates
   for ( auto * pEventReceiver : distributors )
     delete pEventReceiver;
+}
 
+int main()
+{
+  nxgl::SLog::initializeConsole();
+
+  uint32_t width = 1280;
+  uint32_t height = 768;
+
+  auto *pWindow = createWindow( width, height, "nxgl" );
+  runApplication( width, height, pWindow );
   glfwTerminate();
 
   return 0;

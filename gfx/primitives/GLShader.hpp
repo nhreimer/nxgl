@@ -84,7 +84,6 @@ public:
     LOG_DEBUG( "[OpenGL] compiled shader:" );
     LOG_DEBUG( "\n{}", shader );
     GLExec( glAttachShader( m_program, shaderId ) );
-    m_shaders.push_back( shaderId );
     return true;
   }
 
@@ -149,7 +148,7 @@ private:
 
   GLuint m_program { 0 };
   bool m_isLinked { false };
-  std::vector< GLuint > m_shaders;
+
 };
 
 }

@@ -3,6 +3,9 @@
 
 namespace nxgl
 {
+
+constexpr float NX_TAU = 6.283185307;
+
 typedef glm::vec2 nxVec2;
 typedef glm::vec4 nxColor;
 

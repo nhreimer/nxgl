@@ -50,7 +50,7 @@ public:
     GLExec( glBindBuffer( GL_ARRAY_BUFFER, m_vbo ) );
 
     // write to the GL buffer from the read buffer
-    GLExec( glBufferData( GL_ARRAY_BUFFER, m_size, pReadBuffer, m_bufferUsage ) );
+    GLExec( glBufferData( GL_ARRAY_BUFFER, m_size, pReadBuffer, m_bufferUsage ));
 
     LOG_DEBUG( "VBO allocated: {} bytes. {} elements.", m_size, elementCount );
   }
@@ -71,16 +71,6 @@ public:
   {
     bind();
     GLExec( glBufferData( GL_ARRAY_BUFFER, m_size, pReadBuffer, m_bufferUsage ) );
-  }
-
-  ////////////////////////////////////////////////////////////////////////////////
-  /// PUBLIC:
-  /// fills the entire buffer of the VBO
-  /// \param readBuffer vector to be copied to the VBO
-  void fill( const std::vector< TData >& readBuffer ) const
-  {
-    bind();
-    GLExec( glBufferData( GL_ARRAY_BUFFER, m_size, readBuffer.data(), m_bufferUsage ) );
   }
 
   ////////////////////////////////////////////////////////////////////////////////
@@ -154,6 +144,8 @@ public:
   /// PUBLIC:
   inline void bind() const
   {
+    // if this fails with error 502, then the buffer's size got messed up,
+    // such as an overflow
     GLExec( glBindBuffer( GL_ARRAY_BUFFER, m_vbo ) );
   }
 

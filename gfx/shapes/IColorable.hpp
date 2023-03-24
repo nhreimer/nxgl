@@ -7,7 +7,7 @@ namespace nxgl::gfx
 {
 struct IColorable
 {
-  virtual nxgl::nxColor operator()( uint32_t index ) = 0;
+  virtual nxgl::nxColor operator()( uint32_t index ) const = 0;
 };
 
 /***
@@ -20,7 +20,7 @@ public:
   void setColor( const nxgl::nxColor& color ) { m_color = color; }
   [[nodiscard]] nxgl::nxColor getColor() const { return m_color; }
 
-  nxgl::nxColor operator()( uint32_t index ) override
+  nxgl::nxColor operator()( uint32_t index ) const override
   {
     return m_color;
   }
@@ -58,7 +58,7 @@ public:
     m_intervals = intervals;
   }
 
-  nxgl::nxColor operator()( uint32_t index ) override
+  nxgl::nxColor operator()( uint32_t index ) const override
   {
     if ( index == 0 ) return m_startColor;
     if ( index == m_intervals - 1 ) return m_endColor;
