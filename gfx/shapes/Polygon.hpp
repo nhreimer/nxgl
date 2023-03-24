@@ -22,13 +22,13 @@ public:
   Polygon( GLenum bufferUsage, uint32_t edges )
     : m_vbo( bufferUsage, ( GLsizeiptr )( edges * 3 * 2 ), nullptr ),
       m_fillBufferStartIndex( edges * 3 ),
-      m_edges( edges )
+      m_edges( edges ),
+      m_indices( edges * 3 ) // reserve the indices buffer
   {
     assert( edges > 2 );
 
     m_vbo.bind();
     m_vao.registerVBO();
-//    m_vao.registerVBO( m_vbo );
 
     // create the vertices according to a circular pattern
     createVertices( m_edges );
@@ -44,24 +44,23 @@ public:
   /// \param elements number of vertices in the buffer (elements % 3 == 0)
   /// \param pReadBuffer buffer to import
   /// \param drawMode GL_TRIANGLE_FAN, GL_LINE_STRIP, etc.
-  Polygon( GLenum bufferUsage,
-           uint32_t elements,
-           const GLData * pReadBuffer,
-           GLenum drawMode = GL_TRIANGLE_FAN )
-    : m_vbo( bufferUsage, ( GLsizeiptr )( elements * 2 ), pReadBuffer ),
-      m_fillBufferStartIndex( elements ),
-      m_edges( elements / 3 ),
-      m_glDrawMode( drawMode )
-  {
-    // we're making triangles here!
-    assert( elements % 3 == 0 );
-    m_vbo.bind();
-    m_vao.registerVBO();
-    // m_vao.registerVBO( m_vbo );
-
-    // copy the buffer into the outline buffer region
-    m_vbo.setDataRange( m_fillBufferStartIndex, m_fillBufferStartIndex, pReadBuffer );
-  }
+//  Polygon( GLenum bufferUsage,
+//           uint32_t elements,
+//           const GLData * pReadBuffer,
+//           GLenum drawMode = GL_TRIANGLE_FAN )
+//    : m_vbo( bufferUsage, ( GLsizeiptr )( elements * 2 ), pReadBuffer ),
+//      m_fillBufferStartIndex( elements ),
+//      m_edges( elements / 3 ),
+//      m_glDrawMode( drawMode )
+//  {
+//    // we're making triangles here!
+//    assert( elements % 3 == 0 );
+//    m_vbo.bind();
+//    m_vao.registerVBO();
+//
+//    // copy the buffer into the outline buffer region
+//    m_vbo.setDataRange( m_fillBufferStartIndex, m_fillBufferStartIndex, pReadBuffer );
+//  }
 
   ////////////////////////////////////////////////////////////////////////////////
   /// PUBLIC:
@@ -70,6 +69,7 @@ public:
     bind();               // bind ourselves
     m_blend.blend();      // apply blend
 
+    drawPrimaryShape( appCtx );
     drawOutlineShape( appCtx );
   }
 
@@ -144,7 +144,10 @@ private:
     appCtx.mvpApplicator->applyMVP( mvp );
 
     // draw the outline
-    GLExec( glDrawArrays( m_glDrawMode, 0, m_fillBufferStartIndex ) );
+//    GLExec( glDrawArrays( m_glDrawMode, 0, m_fillBufferStartIndex ) );
+
+//    GLExec( glDrawArrays( m_glDrawMode, 0, m_fillBufferStartIndex ) );
+    GLExec( glDrawElements( m_glDrawMode, m_indices.size(), GL_UNSIGNED_SHORT, m_indices.data() ) );
   }
 
   ////////////////////////////////////////////////////////////////////////////////
@@ -194,25 +197,27 @@ private:
     // set point B
     nxgl::nxVec2 pointB { std::cos( 0 ), std::sin( 0 ) };
 
-    uint32_t posInBuffer = 0;
+    m_vbo.setData( 0, { pointA, white } );
+    m_vbo.setData( 1, { pointB, white } );
 
-    for ( uint32_t i = 0; i < edges; ++i )
+    uint32_t posInBuffer = 2;
+
+    for ( uint32_t i = 0, idx = 0; i < edges; ++i, idx += 3 )
     {
-      auto thirdPointAngle = ( float )( i + 1 ) * angle;
-      nxgl::nxVec2 pointC { std::cos( thirdPointAngle ), std::sin( thirdPointAngle ) };
+      if ( i + 1 < edges )
+      {
+        auto thirdPointAngle = ( float ) ( i + 1 ) * angle;
+        nxgl::nxVec2 pointC{ std::cos( thirdPointAngle ), std::sin( thirdPointAngle ) };
+        m_vbo.setData( posInBuffer, { pointC, white } );
+        ++posInBuffer;
+      }
 
-      // assign the outline shape
-      m_vbo.setData( posInBuffer + 0, { pointA, white } );
-      m_vbo.setData( posInBuffer + 1, { pointB, white } );
-      m_vbo.setData( posInBuffer + 2, { pointC, white } );
-
-      // assign the fill shape
-      m_vbo.setData( posInBuffer + m_fillBufferStartIndex, { pointA, white } );
-      m_vbo.setData( posInBuffer + m_fillBufferStartIndex + 1, { pointB, white } );
-      m_vbo.setData( posInBuffer + m_fillBufferStartIndex + 2, { pointC, white } );
-
-      posInBuffer += 3;
-      pointB = pointC;
+      m_indices[ idx ] = 0;
+      m_indices[ idx + 1 ] = i + 1;
+      if ( i + 1 < edges )
+        m_indices[ idx + 2 ] = i + 2;
+      else
+        m_indices[ idx + 2 ] = 1;
     }
   }
 
@@ -294,6 +299,9 @@ private:
 
   // always default to this. overriding it is allowed when supplying a user's buffer
   GLenum m_glDrawMode { GL_TRIANGLE_FAN };
+
+  // these are used to reduce the number of vertices by removing redundancies
+  std::vector< uint16_t > m_indices;
 };
 
 }

@@ -222,6 +222,45 @@ static void runLoop( GLFWwindow * pWindow )
   }
 }
 
+static void createVertices( uint32_t edges )
+{
+  // divide a circle by the number of edges
+  // which is A(0, 0) -> B(0, 1) -> C(1, 1)
+  // note that C is slightly less than 1, 1 however
+  auto angle = nxgl::NX_TAU / ( float )edges;
+
+  // move counterclockwise starting at the center (0, 0)
+  // ABC
+  // ACD
+  // ADE ...
+
+  // get the first two points and then we only need to calculate the third
+  // every loop
+
+  nxgl::nxColor white { 1.f, 1.f, 1.f, 1.f };
+
+  // this is fixed
+  nxgl::nxVec2 pointA { 0, 0 };
+
+  // set point B
+  nxgl::nxVec2 pointB { std::cos( 0 ), std::sin( 0 ) };
+
+  uint32_t posInBuffer = 0;
+
+  for ( uint32_t i = 0; i < edges; ++i )
+  {
+    auto thirdPointAngle = ( float )( i + 1 ) * angle;
+    nxgl::nxVec2 pointC { std::cos( thirdPointAngle ), std::sin( thirdPointAngle ) };
+
+    LOG_DEBUG( "A: ({}, {})", pointA.x, pointA.y );
+    LOG_DEBUG( "B: ({}, {})", pointB.x, pointB.y );
+    LOG_DEBUG( "C: ({}, {})", pointC.x, pointC.y );
+
+    posInBuffer += 3;
+    pointB = pointC;
+  }
+}
+
 int main()
 {
   nxgl::SLog::initializeConsole();
@@ -230,8 +269,8 @@ int main()
   uint32_t height = 768;
 
   auto * pWindow = createWindow( width, height, "nxgl" );
-//  runApplication( width, height, pWindow );
-  runLoop( pWindow );
+  runApplication( width, height, pWindow );
+//  runLoop( pWindow );
   glfwDestroyWindow( pWindow );
   glfwTerminate();
 
