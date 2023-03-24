@@ -11,6 +11,26 @@
 namespace nxgl::ui
 {
 
+static const inline nxgl::gfx::GLData sm_data[ 12 ] =
+{
+  //   x, y            r, g, b, a
+  { {  0.f,   0.f }, { 1.f, 1.f, 1.f, 1.f } },  // A
+  { {  1.f,   1.f }, { 1.f, 1.f, 1.f, 1.f } },  // B
+  { { -1.f,   1.f }, { 1.f, 1.f, 1.f, 1.f } },  // C
+
+  { {  0.f,   0.f }, { 1.f, 1.f, 1.f, 1.f } },  // A
+  { { -1.f,   1.f }, { 1.f, 1.f, 1.f, 1.f } },  // C
+  { { -1.f,  -1.f }, { 1.f, 1.f, 1.f, 1.f } },  // D
+
+  { {  0.f,   0.f }, { 1.f, 1.f, 1.f, 1.f } },  // A
+  { { -1.f,  -1.f }, { 1.f, 1.f, 1.f, 1.f } },  // D
+  { {  1.f,  -1.f }, { 1.f, 1.f, 1.f, 1.f } },  // E
+
+  { {  0.f,   0.f }, { 1.f, 1.f, 1.f, 1.f } },  // A
+  { {  1.f,  -1.f }, { 1.f, 1.f, 1.f, 1.f } },  // E
+  { {  1.f,   1.f }, { 1.f, 1.f, 1.f, 1.f } }   // B
+};
+
 class ImguiMainWindowReceiver : public EventReceiver
 {
 
@@ -40,6 +60,19 @@ public:
     m_hexa.setFillColor( outerColorizer );
     m_hexa.getBlend().isEnabled = true;
     m_hexa.getBlend().destColor = GL_ONE_MINUS_SRC_COLOR;
+
+    ////////////////////////////////////////////////////////////////////////////////
+
+    m_import.getModel().setScale( { 100.f, 100.f } );
+    m_import.getModel().setPosition( { appCtx.windowSize.x / 2.f - 150.f,
+                                       appCtx.windowSize.y / 2.f - 150.f } );
+
+    m_import.setOutlineWidth( .2f );
+    m_import.setOutlineColor( innerColorizer );
+    m_import.setFillColor( outerColorizer );
+
+    ////////////////////////////////////////////////////////////////////////////////
+
   }
 
   void update( ApplicationContext &appCtx, GLFWwindow *window, const nxTimePoint frameDeltaInMS ) override
@@ -57,6 +90,7 @@ public:
   {
     m_polygon.draw( appCtx, window );
     m_hexa.draw( appCtx, window );
+    m_import.draw( appCtx, window );
   }
 
   void
@@ -82,6 +116,7 @@ private:
   float m_timer { 0.f };
   nxgl::gfx::Polygon m_polygon { GL_DYNAMIC_DRAW, 4 };
   nxgl::gfx::Polygon m_hexa { GL_DYNAMIC_DRAW, 6 };
+  nxgl::gfx::Polygon m_import { GL_DYNAMIC_DRAW, 12, sm_data };
 
 };
 

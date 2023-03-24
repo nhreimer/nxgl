@@ -56,7 +56,7 @@ public:
       eventDistributor->draw( m_appCtx, m_pWindow );
 
       // Swap front and back buffers, i.e., display
-      glfwSwapBuffers( m_pWindow );
+      GLExec( glfwSwapBuffers( m_pWindow ) );
     }
 
     eventDistributor->shutdown( m_appCtx, m_pWindow );

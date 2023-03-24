@@ -2,6 +2,7 @@
 #define INC_318D0B9B45B4468B88E526CEB17E3543
 
 #include "gfx/primitives/GLUtility.hpp"
+#include "gfx/primitives/GLBuffer.hpp"
 
 namespace nxgl::gfx
 {

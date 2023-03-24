@@ -30,9 +30,11 @@ private:
     assert( !m_isCreated );
     assert( m_shader.loadShader( GL_VERTEX_SHADER, R"(resources\DefaultVertex.glsl)" ) &&
             m_shader.loadShader( GL_FRAGMENT_SHADER, R"(resources\DefaultFragment.glsl)" ));
-    assert( m_shader.link());
+    assert( m_shader.link() );
     m_isCreated = true;
   }
+
+private:
 
   void bind()
   {

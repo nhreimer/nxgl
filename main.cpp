@@ -99,6 +99,129 @@ static void runApplication( uint32_t width,       // initial width
     delete pEventReceiver;
 }
 
+namespace nxgl::gfx
+{
+
+template < typename TData >
+class _GLVbo : public GLBuffer< GL_ARRAY_BUFFER, TData >
+{
+public:
+  _GLVbo( GLenum bufferUsage, GLsizeiptr elementCount )
+    : GLBuffer< GL_ARRAY_BUFFER, TData >( bufferUsage, elementCount * sizeof( TData ), nullptr )
+  {}
+
+  _GLVbo( GLenum bufferUsage, GLsizeiptr elementCount, const TData * pReadBuffer )
+    : GLBuffer< GL_ARRAY_BUFFER, TData >( bufferUsage, elementCount * sizeof( TData ), pReadBuffer )
+  {}
+};
+
+template < typename TUint >
+class _GLIbo : public GLBuffer< GL_ELEMENT_ARRAY_BUFFER, TUint >
+{
+public:
+
+  // opengl is strict about the unsigned part
+  static_assert( std::is_integral< TUint >::value &&
+                 std::is_unsigned< TUint >::value,
+                 "TUint must be an unsigned integer!" );
+
+  _GLIbo( GLenum bufferUsage, GLsizeiptr elementCount )
+    : GLBuffer< GL_ELEMENT_ARRAY_BUFFER, TUint >( bufferUsage, elementCount * sizeof( TUint ), nullptr )
+  {}
+
+  _GLIbo( GLenum bufferUsage, GLsizeiptr elementCount, const TUint * pReadBuffer )
+  : GLBuffer< GL_ELEMENT_ARRAY_BUFFER, TUint >( bufferUsage, elementCount * sizeof( TUint ), pReadBuffer )
+  {}
+
+private:
+};
+
+}
+
+static void runLoop( GLFWwindow * pWindow )
+{
+  nxgl::Clock timer;
+
+  nxgl::gfx::GLData data[] =
+  {
+    //   x, y            r, g, b, a
+    { {  0.f,   0.f }, { 1.f, 1.f, 1.f, 1.f } },  // A        0
+    { {  1.f,   1.f }, { 1.f, 1.f, 1.f, 1.f } },  // B        1
+    { { -1.f,   1.f }, { 1.f, 1.f, 1.f, 1.f } },  // C        2
+
+//    { {  0.f,   0.f }, { 1.f, 1.f, 1.f, 1.f } },  // A      0
+//    { { -1.f,   1.f }, { 1.f, 1.f, 1.f, 1.f } },  // C      2
+    { { -1.f,  -1.f }, { 1.f, 1.f, 1.f, 1.f } },  // D        3
+
+//    { {  0.f,   0.f }, { 1.f, 1.f, 1.f, 1.f } },  // A      0
+//    { { -1.f,  -1.f }, { 1.f, 1.f, 1.f, 1.f } },  // D      3
+    { {  1.f,  -1.f }, { 1.f, 1.f, 1.f, 1.f } }  // E         4
+
+//    { {  0.f,   0.f }, { 1.f, 1.f, 1.f, 1.f } },  // A      0
+//    { {  1.f,  -1.f }, { 1.f, 1.f, 1.f, 1.f } },  // E      4
+//    { {  1.f,   1.f }, { 1.f, 1.f, 1.f, 1.f } }   // B      1
+  };
+
+  uint8_t indices[] =
+  {
+    0, 1, 2,
+    0, 2, 3,
+    0, 3, 4,
+    0, 4, 1
+  };
+
+  nxgl::gfx::SpectrumColorizer colorizer;
+  colorizer.setColors( 5, { 1.f, 1.f, 1.f, 1.f }, { 1.f, 0.f, 0.f, 1.f } );
+
+  nxgl::gfx::_GLVbo< nxgl::gfx::GLData > vbo( GL_DYNAMIC_DRAW,  5, data );
+//  nxgl::gfx::_GLIbo< uint8_t > ibo( GL_STATIC_DRAW, 12, indices );
+  nxgl::gfx::GLVao vao;
+  nxgl::gfx::ShapeShader shader;
+  nxgl::gfx::GLModel model;
+  nxgl::gfx::GLCamera camera;
+
+  for ( uint32_t i = 0; i < 5; ++i )
+  {
+    nxgl::nxColor color = colorizer( i );
+    GLExec( glBufferSubData(
+      GL_ARRAY_BUFFER,
+      ( GLintptr )( sizeof( nxgl::gfx::GLData ) * i + sizeof( nxgl::nxVec2 ) ),
+      sizeof( nxgl::nxColor ),
+      &color ) );
+  }
+
+  camera.setProjection( { 1280.f, 768.f } );
+  model.setScale( { 100.f, 100.f } );
+  model.setPosition( { 1280.f / 2.f, 768.f / 2.f } );
+
+  vbo.bind();
+  vao.registerVBO();
+
+//  ibo.bind();
+  vbo.unbind();
+
+  while ( !glfwWindowShouldClose( pWindow ) )
+  {
+    // Poll for and process events
+    glfwPollEvents();
+
+    int width, height;
+    glfwGetFramebufferSize( pWindow, &width, &height );
+    glViewport( 0, 0, width, height );
+    glClearColor( 0.15f, 0.15f, 0.15f, 1.f );
+    glClear( GL_COLOR_BUFFER_BIT );
+
+    vao.bind();
+    auto mvp = model.getTranslation( camera );
+    shader.applyMVP( mvp );
+
+    GLExec( glDrawElements( GL_TRIANGLE_FAN, 12, GL_UNSIGNED_BYTE, indices ) );
+
+    // Swap front and back buffers, i.e., display
+    GLExec( glfwSwapBuffers( pWindow ) );
+  }
+}
+
 int main()
 {
   nxgl::SLog::initializeConsole();
@@ -106,8 +229,10 @@ int main()
   uint32_t width = 1280;
   uint32_t height = 768;
 
-  auto *pWindow = createWindow( width, height, "nxgl" );
-  runApplication( width, height, pWindow );
+  auto * pWindow = createWindow( width, height, "nxgl" );
+//  runApplication( width, height, pWindow );
+  runLoop( pWindow );
+  glfwDestroyWindow( pWindow );
   glfwTerminate();
 
   return 0;

@@ -45,9 +45,10 @@ public:
   /// PUBLIC:
   /// registers a VBO with the VAO. this registration happens once.
   /// \param vbo
-  void registerVBO( const GLVbo< GLData >& vbo )
+  //void registerVBO( const GLVbo< GLData >& vbo )
+  void registerVBO()
   {
-    LOG_DEBUG( "VAO attempting to register VBO {}", vbo.id() );
+    //LOG_DEBUG( "VAO attempting to register VBO {}", vbo.id() );
     assert( m_arrayCount == 0 );
 
     // this is also included in GLData.hpp
@@ -90,7 +91,7 @@ public:
 
     ++m_arrayCount;
 
-    LOG_DEBUG( "VAO registered VBO {}", vbo.id() );
+//    LOG_DEBUG( "VAO registered VBO {}", vbo.id() );
   }
 
   ////////////////////////////////////////////////////////////////////////////////
