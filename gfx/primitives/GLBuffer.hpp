@@ -131,6 +131,12 @@ public:
   /// \return the OpenGL buffer ID
   [[nodiscard]] inline GLuint id() const { return m_bufferId; }
 
+  ////////////////////////////////////////////////////////////////////////////////
+  /// PUBLIC:
+  ///
+  /// \return the size of the buffer in bytes
+  [[nodiscard]] inline GLsizeiptr size() const { return m_szBuffer; }
+
 private:
 
   GLuint m_bufferId { 0 };

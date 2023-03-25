@@ -18,28 +18,32 @@ public:
 
   void initialize( ApplicationContext &appCtx, GLFWwindow *window ) override
   {
+    auto * pBlend = &m_hexa.getBlend();
+    m_pModel = &m_hexa.getModel();
+
     nxgl::gfx::SpectrumColorizer innerColorizer;
     innerColorizer.setColors( 12, { 1.f, 0.f, 0.f, 1.f }, { 1.f, 0.f, 1.f, 1.f } );
 
     nxgl::gfx::SpectrumColorizer outerColorizer;
     outerColorizer.setColors( 12, { 1.f, 0.f, 0.f, 1.f }, { 1.f, 1.f, 0.f, 1.f } );
 
-    m_polygon.getModel().setScale( { 100.f, 100.f } );
-    m_polygon.getModel().setPosition( { appCtx.windowSize.x / 2.f, appCtx.windowSize.y / 2.f } );
-//    m_polygon.setOutlineWidth( .15f );
+    auto size = 100.f;
+
+    m_polygon.getModel().setScale( { size, size } );
+    m_polygon.getModel().setPosition( { appCtx.windowSize.x / 2.f - size,
+                                        appCtx.windowSize.y / 2.f } );
+    m_polygon.setOutlineWidth( .15f );
     m_polygon.setFillColor( innerColorizer );
     m_polygon.setOutlineColor( outerColorizer );
 
     ////////////////////////////////////////////////////////////////////////////////
 
-    m_hexa.getModel().setScale( { 100.f, 100.f } );
-    m_hexa.getModel().setPosition( { appCtx.windowSize.x / 2.f - 100.f,
-                                     appCtx.windowSize.y / 2.f - 100.f } );
-////    m_hexa.setOutlineWidth( .2f );
+    m_hexa.getModel().setScale( { size, size } );
+    m_hexa.getModel().setPosition( { appCtx.windowSize.x / 2.f,
+                                     appCtx.windowSize.y / 2.f } );
+    m_hexa.setOutlineWidth( .2f );
     m_hexa.setOutlineColor( innerColorizer );
     m_hexa.setFillColor( outerColorizer );
-    m_hexa.getBlend().isEnabled = true;
-    m_hexa.getBlend().destColor = GL_ONE_MINUS_SRC_COLOR;
 
     ////////////////////////////////////////////////////////////////////////////////
 
@@ -52,6 +56,10 @@ public:
 //    m_import.setFillColor( outerColorizer );
 
     ////////////////////////////////////////////////////////////////////////////////
+
+    pBlend->isEnabled = true;
+    pBlend->destColor = GL_ONE_MINUS_SRC_COLOR;
+    pBlend->srcColor = GL_ONE;
 
   }
 
@@ -84,7 +92,7 @@ public:
     {
       double xpos, ypos;
       glfwGetCursorPos( window, &xpos, &ypos );
-      if ( m_polygon.getModel().getBounds().contains( { xpos, ypos } ) )
+      if ( m_pModel->getBounds().contains( { xpos, ypos } ) )
       {
         LOG_DEBUG( "MATCH" );
       }
@@ -96,6 +104,8 @@ private:
   float m_timer { 0.f };
   nxgl::gfx::Polygon m_polygon { GL_DYNAMIC_DRAW, 4 };
   nxgl::gfx::Polygon m_hexa { GL_DYNAMIC_DRAW, 6 };
+  nxgl::gfx::GLModel * m_pModel { nullptr };
+
 //  nxgl::gfx::Polygon m_import { GL_DYNAMIC_DRAW, 12, sm_data };
 
 };

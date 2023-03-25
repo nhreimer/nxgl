@@ -31,7 +31,8 @@ public:
     m_vao.registerVBO();
 
     // create the vertices according to a circular pattern
-    createVertices( m_edges );
+    // NOTE: the vertices get created on initialization no matter what.
+    Polygon::createVertices( m_edges );
   }
 
   ////////////////////////////////////////////////////////////////////////////////
@@ -130,12 +131,12 @@ public:
     }
   }
 
-private:
+protected:
 
   ////////////////////////////////////////////////////////////////////////////////
-  /// PRIVATE:
+  /// PROTECTED:
   /// gets drawn no matter what
-  void drawPrimaryShape( const ApplicationContext& appCtx )
+  virtual void drawPrimaryShape( const ApplicationContext& appCtx )
   {
     // get the MVP for this object
     auto mvp = m_model.getTranslation( appCtx.camera );
@@ -151,9 +152,9 @@ private:
   }
 
   ////////////////////////////////////////////////////////////////////////////////
-  /// PRIVATE:
+  /// PROTECTED:
   /// only drawn when the outline is > 0.
-  void drawOutlineShape( const ApplicationContext& appCtx )
+  virtual void drawOutlineShape( const ApplicationContext& appCtx )
   {
     // skip the outline if it's not set
     if ( m_outlinePercentage > 0.f )
@@ -168,13 +169,14 @@ private:
 
       auto mvp = m_innerTransform.getTranslation( appCtx.camera );
       appCtx.mvpApplicator->applyMVP( mvp );
-      GLExec( glDrawArrays( m_glDrawMode, m_fillBufferStartIndex, m_fillBufferStartIndex ));
+//      GLExec( glDrawArrays( m_glDrawMode, m_fillBufferStartIndex, m_fillBufferStartIndex ) );
+      GLExec( glDrawElements( m_glDrawMode, m_indices.size(), GL_UNSIGNED_SHORT, m_indices.data() ) );
     }
   }
 
   ////////////////////////////////////////////////////////////////////////////////
-  /// PRIVATE:
-  void createVertices( uint32_t edges )
+  /// PROTECTED:
+  virtual void createVertices( uint32_t edges )
   {
     // divide a circle by the number of edges
     // which is A(0, 0) -> B(0, 1) -> C(1, 1)
@@ -222,14 +224,14 @@ private:
   }
 
   ////////////////////////////////////////////////////////////////////////////////
-  /// PRIVATE:
+  /// PROTECTED:
   void bind() const
   {
     m_vao.bind();
   }
 
   ////////////////////////////////////////////////////////////////////////////////
-  /// PRIVATE:
+  /// PROTECTED:
   void unbind() const
   {
     m_vbo.unbind();
@@ -237,7 +239,7 @@ private:
   }
 
   ////////////////////////////////////////////////////////////////////////////////
-  /// PRIVATE:
+  /// PROTECTED:
   [[nodiscard]] nxgl::nxColor getColor( uint32_t index )
   {
     assert( sizeof( GLData ) * index + sizeof( nxgl::nxVec2 ) < m_vbo.size() );
@@ -255,7 +257,7 @@ private:
   }
 
   ////////////////////////////////////////////////////////////////////////////////
-  /// PRIVATE:
+  /// PROTECTED:
   void setColor( uint32_t index, const nxgl::nxColor& color )
   {
     assert( sizeof( GLData ) * index + sizeof( nxgl::nxVec2 ) < m_vbo.size() );
@@ -268,6 +270,11 @@ private:
       sizeof( nxgl::nxColor ),
       &color ) );
   }
+
+  ////////////////////////////////////////////////////////////////////////////////
+  /// PROTECTED:
+
+  [[nodiscard]] GLVbo< GLData >& getVBO() { return m_vbo; }
 
   ////////////////////////////////////////////////////////////////////////////////
 

@@ -135,13 +135,20 @@ public:
 
   ////////////////////////////////////////////////////////////////////////////////
   /// PUBLIC:
-  inline void setUniformMatrix( GLint address, const glm::mat4 & value )
+  inline void setUniformMatrix( GLint address, const glm::mat4 & value ) const
   {
     glUniformMatrix4fv(
       address,
       1,
       GL_FALSE,
       glm::value_ptr( value ) );
+  }
+
+  ////////////////////////////////////////////////////////////////////////////////
+  /// PUBLIC:
+  inline void setUniformUInt( GLint address, GLuint value ) const
+  {
+    glUniform1ui( address, value );
   }
 
 private:
