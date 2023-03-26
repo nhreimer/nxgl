@@ -6,8 +6,6 @@
 #include "gfx/shapes/IMVPApplicator.hpp"
 #include "gfx/shapes/IColorable.hpp"
 
-#include "gfx/shapes/Polygon.hpp"
-
 namespace nxgl::ui
 {
 
@@ -18,48 +16,39 @@ public:
 
   void initialize( ApplicationContext &appCtx, GLFWwindow *window ) override
   {
-    auto * pBlend = &m_hexa.getBlend();
-    m_pModel = &m_hexa.getModel();
+    auto * pBlend = &m_polyFill.getBlender();
 
-    nxgl::gfx::SpectrumColorizer innerColorizer;
-    innerColorizer.setColors( 12, { 1.f, 0.f, 0.f, 1.f }, { 1.f, 0.f, 1.f, 1.f } );
+//    nxgl::gfx::SpectrumColorizer innerColorizer;
+//    innerColorizer.setColors( 12, { 0.f, 0.f, 1.f, 1.f }, { 1.f, 0.f, 1.f, 1.f } );
 
-    nxgl::gfx::SpectrumColorizer outerColorizer;
-    outerColorizer.setColors( 12, { 1.f, 0.f, 0.f, 1.f }, { 1.f, 1.f, 0.f, 1.f } );
+    nxgl::gfx::SolidColorizer outerColorizer;
+    outerColorizer.setColor( { 0.f, 0.f, 1.f, 1.f } );
+
+    nxgl::gfx::SolidColorizer innerColorizer;
+    innerColorizer.setColor( { 1.f, 0.f, 0.f, 1.f } );
 
     auto size = 100.f;
 
-    m_polygon.getModel().setScale( { size, size } );
-    m_polygon.getModel().setPosition( { appCtx.windowSize.x / 2.f - size,
+    m_poly.getModel().setScale( { size, size } );
+    m_poly.getModel().setPosition( { appCtx.windowSize.x / 2.f - size,
                                         appCtx.windowSize.y / 2.f } );
-    m_polygon.setOutlineWidth( .15f );
-    m_polygon.setFillColor( innerColorizer );
-    m_polygon.setOutlineColor( outerColorizer );
+    m_poly.setColor( innerColorizer );
 
-    ////////////////////////////////////////////////////////////////////////////////
-
-    m_hexa.getModel().setScale( { size, size } );
-    m_hexa.getModel().setPosition( { appCtx.windowSize.x / 2.f,
+    m_polyFill.getModel().setScale( { size * .8f, size * .8f } );
+    m_polyFill.getModel().setPosition( { appCtx.windowSize.x / 2.f - size,
                                      appCtx.windowSize.y / 2.f } );
-    m_hexa.setOutlineWidth( .2f );
-    m_hexa.setOutlineColor( innerColorizer );
-    m_hexa.setFillColor( outerColorizer );
+
+    m_polyFill.setColor( outerColorizer );
 
     ////////////////////////////////////////////////////////////////////////////////
 
-//    m_import.getModel().setScale( { 100.f, 100.f } );
-//    m_import.getModel().setPosition( { appCtx.windowSize.x / 2.f - 150.f,
-//                                       appCtx.windowSize.y / 2.f - 150.f } );
-//
-//    m_import.setOutlineWidth( .2f );
-//    m_import.setOutlineColor( innerColorizer );
-//    m_import.setFillColor( outerColorizer );
+//    pBlend->isEnabled = true;
+//    pBlend->srcColor = GL_ONE;
+//    pBlend->destColor = GL_ZERO;
 
-    ////////////////////////////////////////////////////////////////////////////////
-
-    pBlend->isEnabled = true;
-    pBlend->destColor = GL_ONE_MINUS_SRC_COLOR;
-    pBlend->srcColor = GL_ONE;
+//    m_poly.getBlender().isEnabled = true;
+//    m_poly.getBlender().srcColor = GL_ONE;
+//    m_poly.getBlender().destColor = GL_ONE_MINUS_SRC_COLOR;
 
   }
 
@@ -68,17 +57,15 @@ public:
     m_timer += frameDeltaInMS;
     if ( m_timer >= 100.f )
     {
-      m_polygon.getModel().setAngle( m_polygon.getModel().getAngle() - 1.f );
-      m_hexa.getModel().setAngle( m_hexa.getModel().getAngle() + 1.f );
+      //m_poly.getModel().setAngle( m_poly.getModel().getAngle() - 1.f );
       m_timer = 0.f;
     }
   }
 
   void draw( ApplicationContext &appCtx, GLFWwindow *window ) override
   {
-    m_polygon.draw( appCtx, window );
-    m_hexa.draw( appCtx, window );
-//    m_import.draw( appCtx, window );
+    m_poly.draw( appCtx.camera, *appCtx.mvpApplicator );
+    m_polyFill.draw( appCtx.camera, *appCtx.mvpApplicator );
   }
 
   void
@@ -92,21 +79,18 @@ public:
     {
       double xpos, ypos;
       glfwGetCursorPos( window, &xpos, &ypos );
-      if ( m_pModel->getBounds().contains( { xpos, ypos } ) )
-      {
-        LOG_DEBUG( "MATCH" );
-      }
+//      if ( m_pModel->getBounds().contains( { xpos, ypos } ) )
+//      {
+//        LOG_DEBUG( "MATCH" );
+//      }
     }
   }
 
 private:
 
   float m_timer { 0.f };
-  nxgl::gfx::Polygon m_polygon { GL_DYNAMIC_DRAW, 4 };
-  nxgl::gfx::Polygon m_hexa { GL_DYNAMIC_DRAW, 6 };
-  nxgl::gfx::GLModel * m_pModel { nullptr };
-
-//  nxgl::gfx::Polygon m_import { GL_DYNAMIC_DRAW, 12, sm_data };
+  nxgl::gfx::GLPolygon m_poly { GL_DYNAMIC_DRAW, 4 };
+  nxgl::gfx::GLPolygon m_polyFill { GL_DYNAMIC_DRAW, 4 };
 
 };
 

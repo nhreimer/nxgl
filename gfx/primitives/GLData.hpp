@@ -3,6 +3,8 @@
 
 #include "utilities/Definitions.hpp"
 
+#include "gfx/primitives/GLVao.hpp"
+
 namespace nxgl::gfx
 {
 
@@ -22,6 +24,34 @@ struct GLData
 {
   nxgl::nxVec2 position;  // x, y
   nxgl::nxColor color;    // r, g, b, a
+
+  static GLVao createVAO()
+  {
+    GLVao vao;
+    vao.bind();
+
+    // set POSITION
+    GLExec( glVertexAttribPointer(
+      0,
+      2,                // x, y
+      GL_FLOAT,
+      GL_FALSE,
+      sizeof( GLData ),
+      ( const GLvoid* )nullptr ) ); // no offset
+    GLExec( glEnableVertexAttribArray( 0 ) );
+
+    // set COLOR
+    GLExec( glVertexAttribPointer(
+      1,
+      4,                // r, g, b, a
+      GL_FLOAT,
+      GL_FALSE,
+      sizeof( GLData ),
+      ( const GLvoid * )sizeof( nxgl::nxVec2 ) ) );  // offset past the x, y position
+    GLExec( glEnableVertexAttribArray( 1 ) );
+
+    return vao;
+  }
 };
 
 }

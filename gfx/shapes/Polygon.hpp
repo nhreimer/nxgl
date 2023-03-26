@@ -20,15 +20,16 @@ public:
   /// \param bufferUsage GL_DYNAMIC_DRAW, GL_STATIC_DRAW, etc
   /// \param edges sides of the polygon
   Polygon( GLenum bufferUsage, uint32_t edges )
+    // TODO: reduce buffer size of VBO to the correct size
     : m_vbo( bufferUsage, ( GLsizeiptr )( edges * 3 * 2 ), nullptr ),
       m_fillBufferStartIndex( edges * 3 ),
       m_edges( edges ),
-      m_indices( edges * 3 ) // reserve the indices buffer
+      m_indices( edges * 3 * 2 ) // reserve the indices buffer
   {
     assert( edges > 2 );
 
     m_vbo.bind();
-    m_vao.registerVBO();
+//    m_vao.registerVBO();
 
     // create the vertices according to a circular pattern
     // NOTE: the vertices get created on initialization no matter what.
@@ -71,7 +72,7 @@ public:
     m_blend.blend();      // apply blend
 
     drawPrimaryShape( appCtx );
-    drawOutlineShape( appCtx );
+    //drawOutlineShape( appCtx );
   }
 
   ////////////////////////////////////////////////////////////////////////////////
@@ -98,6 +99,17 @@ public:
   {
     assert( percentage >= 0.f && percentage <= 1.f );
     m_outlinePercentage = percentage;
+
+    // get all the data
+    std::vector< GLData > buffer( m_fillBufferStartIndex );
+    m_vbo.getDataRange( m_fillBufferStartIndex, m_fillBufferStartIndex, buffer.data() );
+
+    // scale all the positions
+    for ( auto& item : buffer )
+      item.position *= percentage;
+
+    // copy the data back into the buffer
+    m_vbo.setDataRange( m_fillBufferStartIndex, m_fillBufferStartIndex, buffer.data() );
   }
 
   ////////////////////////////////////////////////////////////////////////////////
@@ -202,6 +214,9 @@ protected:
     m_vbo.setData( 0, { pointA, white } );
     m_vbo.setData( 1, { pointB, white } );
 
+    m_vbo.setData( m_fillBufferStartIndex, { pointA, white } );
+    m_vbo.setData( m_fillBufferStartIndex + 1, { pointA, white } );
+
     uint32_t posInBuffer = 2;
 
     for ( uint32_t i = 0, idx = 0; i < edges; ++i, idx += 3 )
@@ -211,6 +226,7 @@ protected:
         auto thirdPointAngle = ( float ) ( i + 1 ) * angle;
         nxgl::nxVec2 pointC{ std::cos( thirdPointAngle ), std::sin( thirdPointAngle ) };
         m_vbo.setData( posInBuffer, { pointC, white } );
+        m_vbo.setData( m_fillBufferStartIndex + posInBuffer, { pointC, white } );
         ++posInBuffer;
       }
 

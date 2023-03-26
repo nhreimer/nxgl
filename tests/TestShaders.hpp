@@ -49,7 +49,7 @@ void runLoopShaders( GLFWwindow * pWindow )
   model.setPosition( { 1280.f / 2.f, 768.f / 2.f } );
 
   vbo.bind();
-  vao.registerVBO();
+//  vao.registerVBO();
 
   vbo.unbind();
 
