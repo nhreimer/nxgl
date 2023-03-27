@@ -42,17 +42,14 @@ public:
   /// \param endColor the end of the spectrum
   void setColors( uint32_t intervals, // this does NOT refer to the number of vertices
                   const nxColor& startColor,
-                  const nxColor& endColor,
-                  float reversePercentage = 1.f )
+                  const nxColor& endColor )
   {
     assert( intervals > 1 );
-    assert( reversePercentage >= 0.f && reversePercentage <= 1.f );
 
     m_intervals = intervals;
     m_startColor = startColor;
     m_endColor = endColor;
     m_deltaColor = endColor - startColor;
-    m_reverseDirectionPercentage = 1.f - reversePercentage;
   }
 
   void setIntervals( uint32_t intervals )
@@ -68,11 +65,6 @@ public:
 
     auto percentage = ( float )( index % m_intervals ) / ( float )m_intervals;
 
-    if ( ( float )( index + 1 ) / ( float )m_intervals >= m_reverseDirectionPercentage )
-    {
-      percentage += m_reverseDirectionPercentage;
-    }
-
     return { m_deltaColor.r * percentage + m_startColor.r,
              m_deltaColor.g * percentage + m_startColor.g,
              m_deltaColor.b * percentage + m_startColor.b,
@@ -86,8 +78,6 @@ private:
   nxColor m_deltaColor;
   nxColor m_startColor;
   nxColor m_endColor;
-
-  float m_reverseDirectionPercentage { 0.f };
 
 };
 

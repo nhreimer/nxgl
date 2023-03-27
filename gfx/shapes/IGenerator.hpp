@@ -12,8 +12,12 @@ struct IGenerator
   virtual std::vector< uint8_t > generateIndices( uint8_t edges ) = 0;
 };
 
+/// ABC, 012
+/// ACD, 023
+/// ADE, 034
+/// \tparam TData
 template < typename TData >
-class CCWCenteredPolygon : public IGenerator< TData >
+class CCWABCPolygon : public IGenerator< TData >
 {
 public:
 
@@ -52,6 +56,67 @@ public:
         indexBuffer[ idx + 2 ] = edge + 2;
       else
         indexBuffer[ idx + 2 ] = 1;
+    }
+
+    return std::move( indexBuffer );
+  }
+
+};
+
+/// CBA, 210
+/// DCA, 320
+/// EDA, 430
+/// \tparam TData
+template < typename TData >
+class CCWCBAPolygon : public CCWABCPolygon< TData >
+{
+public:
+
+  [[nodiscard]] GLenum getMode() const override { return GL_TRIANGLE_FAN; }
+
+  std::vector< uint8_t > generateIndices( uint8_t edges ) override
+  {
+    std::vector< uint8_t > indexBuffer( edges * 3 );
+
+    for ( int idx = 0, edge = 0; edge < edges; idx += 3, ++edge )
+    {
+      if ( edge + 1 < edges )
+        indexBuffer[ idx ] = edge + 2;
+      else
+        indexBuffer[ idx ] = 1;
+
+      indexBuffer[ idx + 1 ] = edge + 1;
+      indexBuffer[ idx + 2 ] = 0;
+    }
+
+    return std::move( indexBuffer );
+  }
+
+};
+
+/// BCA, 120
+/// CDA, 230
+/// DDA, 340
+/// \tparam TData
+template < typename TData >
+class CCWBCAPolygon : public CCWABCPolygon< TData >
+{
+public:
+
+  [[nodiscard]] GLenum getMode() const override { return GL_TRIANGLE_FAN; }
+
+  std::vector< uint8_t > generateIndices( uint8_t edges ) override
+  {
+    std::vector< uint8_t > indexBuffer( edges * 3 );
+
+    for ( int idx = 0, edge = 0; edge < edges; idx += 3, ++edge )
+    {
+      indexBuffer[ idx ] = edge + 1;
+      if ( edge + 1 < edges )
+        indexBuffer[ idx + 1 ] = edge + 2;
+      else
+        indexBuffer[ idx + 1 ] = 1;
+      indexBuffer[ idx + 2 ] = 0;
     }
 
     return std::move( indexBuffer );
