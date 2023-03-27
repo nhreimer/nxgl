@@ -18,38 +18,30 @@ public:
   {
     auto * pBlend = &m_polyFill.getBlender();
 
-//    nxgl::gfx::SpectrumColorizer innerColorizer;
-//    innerColorizer.setColors( 12, { 0.f, 0.f, 1.f, 1.f }, { 1.f, 0.f, 1.f, 1.f } );
+    nxgl::gfx::SpectrumColorizer outerColorizer;
+    outerColorizer.setColors( 5, { 0.f, 1.f, 0.f, 1.f }, { 0.f, 0.f, 1.f, 1.f } );
 
-    nxgl::gfx::SolidColorizer outerColorizer;
-    outerColorizer.setColor( { 0.f, 0.f, 1.f, 1.f } );
-
-    nxgl::gfx::SolidColorizer innerColorizer;
-    innerColorizer.setColor( { 1.f, 0.f, 0.f, 1.f } );
+    nxgl::gfx::SpectrumColorizer innerColorizer;
+    innerColorizer.setColors( 5, { 1.f, 0.f, 0.f, 1.f }, { 0.f, 1.f, 0.f, 1.f } );
 
     auto size = 100.f;
 
     m_poly.getModel().setScale( { size, size } );
-    m_poly.getModel().setPosition( { appCtx.windowSize.x / 2.f - size,
-                                        appCtx.windowSize.y / 2.f } );
-    m_poly.setColor( innerColorizer );
+    m_poly.getModel().setPosition( { appCtx.windowSize.x / 2.f,
+                                     appCtx.windowSize.y / 2.f } );
+    m_poly.setColor( outerColorizer );
 
     m_polyFill.getModel().setScale( { size * .8f, size * .8f } );
-    m_polyFill.getModel().setPosition( { appCtx.windowSize.x / 2.f - size,
-                                     appCtx.windowSize.y / 2.f } );
+    m_polyFill.getModel().setPosition( { appCtx.windowSize.x / 2.f,
+                                         appCtx.windowSize.y / 2.f } );
 
-    m_polyFill.setColor( outerColorizer );
+    m_polyFill.setColor( innerColorizer );
 
     ////////////////////////////////////////////////////////////////////////////////
 
-//    pBlend->isEnabled = true;
-//    pBlend->srcColor = GL_ONE;
-//    pBlend->destColor = GL_ZERO;
-
-//    m_poly.getBlender().isEnabled = true;
-//    m_poly.getBlender().srcColor = GL_ONE;
-//    m_poly.getBlender().destColor = GL_ONE_MINUS_SRC_COLOR;
-
+    pBlend->isEnabled = true;
+    pBlend->srcColor = GL_ONE;
+    pBlend->destColor = GL_ONE_MINUS_SRC_COLOR;
   }
 
   void update( ApplicationContext &appCtx, GLFWwindow *window, const nxTimePoint frameDeltaInMS ) override
@@ -57,7 +49,8 @@ public:
     m_timer += frameDeltaInMS;
     if ( m_timer >= 100.f )
     {
-      //m_poly.getModel().setAngle( m_poly.getModel().getAngle() - 1.f );
+      m_poly.getModel().setAngle( m_poly.getModel().getAngle() - 1.f );
+      m_polyFill.getModel().setAngle( m_polyFill.getModel().getAngle() - 1.f );
       m_timer = 0.f;
     }
   }

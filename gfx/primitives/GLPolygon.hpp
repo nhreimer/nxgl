@@ -7,16 +7,6 @@
 namespace nxgl::gfx
 {
 
-template < typename TData, typename TUint >
-struct IVertexGenerator
-{
-  static_assert( std::is_integral< TUint >::value &&
-                 std::is_unsigned< TUint >::value );
-
-  virtual GLenum getPrimitiveMode() = 0;
-  virtual void createVertices( GLVbo< TData >& vbo, GLIbo< TUint >& ibo ) = 0;
-};
-
 class GLPolygon
 {
 
@@ -27,7 +17,6 @@ public:
       m_vbo( bufferUsage, ( GLsizeiptr )( edges + 1 ), nullptr ),
       m_ibo( bufferUsage, ( GLsizeiptr )( edges * 3 ), nullptr ),
       m_edges( edges )
-
   {
     // vbo size = edges + 1 because we use the triangle fan, which gives a pivot point in the center
     //                      so, 4 points in a rectangle and then 1 point in the center.
@@ -41,7 +30,6 @@ public:
 
     m_vbo.bind();
 
-    // TODO: use IVertexGenerator
     createVertices();
   }
 
