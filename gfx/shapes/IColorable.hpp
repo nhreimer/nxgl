@@ -44,7 +44,7 @@ public:
                   const nxColor& startColor,
                   const nxColor& endColor )
   {
-    assert( intervals > 2 );
+    assert( intervals > 1 );
 
     m_intervals = intervals;
     m_startColor = startColor;

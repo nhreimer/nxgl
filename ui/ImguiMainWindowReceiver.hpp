@@ -16,32 +16,25 @@ public:
 
   void initialize( ApplicationContext &appCtx, GLFWwindow *window ) override
   {
-    auto * pBlend = &m_polyFill.getBlender();
-
     nxgl::gfx::SpectrumColorizer outerColorizer;
     outerColorizer.setColors( 5, { 0.f, 1.f, 0.f, 1.f }, { 0.f, 0.f, 1.f, 1.f } );
 
     nxgl::gfx::SpectrumColorizer innerColorizer;
-    innerColorizer.setColors( 5, { 1.f, 0.f, 0.f, 1.f }, { 0.f, 1.f, 0.f, 1.f } );
+    innerColorizer.setColors( 10, { 1.f, 0.f, 0.f, 1.f }, { 0.f, 1.f, 0.f, 1.f } );
 
     auto size = 100.f;
 
     m_poly.getModel().setScale( { size, size } );
     m_poly.getModel().setPosition( { appCtx.windowSize.x / 2.f,
                                      appCtx.windowSize.y / 2.f } );
-    m_poly.setColor( outerColorizer );
-
-    m_polyFill.getModel().setScale( { size * .8f, size * .8f } );
-    m_polyFill.getModel().setPosition( { appCtx.windowSize.x / 2.f,
-                                         appCtx.windowSize.y / 2.f } );
-
-    m_polyFill.setColor( innerColorizer );
+    m_poly.setOutlineColor( outerColorizer );
+    m_poly.setFillColor( innerColorizer );
 
     ////////////////////////////////////////////////////////////////////////////////
 
-    pBlend->isEnabled = true;
-    pBlend->srcColor = GL_ONE;
-    pBlend->destColor = GL_ONE_MINUS_SRC_COLOR;
+//    pBlend->isEnabled = true;
+//    pBlend->srcColor = GL_ONE;
+//    pBlend->destColor = GL_ONE_MINUS_SRC_COLOR;
   }
 
   void update( ApplicationContext &appCtx, GLFWwindow *window, const nxTimePoint frameDeltaInMS ) override
@@ -50,7 +43,6 @@ public:
     if ( m_timer >= 100.f )
     {
       m_poly.getModel().setAngle( m_poly.getModel().getAngle() - 1.f );
-      m_polyFill.getModel().setAngle( m_polyFill.getModel().getAngle() - 1.f );
       m_timer = 0.f;
     }
   }
@@ -58,7 +50,7 @@ public:
   void draw( ApplicationContext &appCtx, GLFWwindow *window ) override
   {
     m_poly.draw( appCtx.camera, *appCtx.mvpApplicator );
-    m_polyFill.draw( appCtx.camera, *appCtx.mvpApplicator );
+//    m_polyFill.draw( appCtx.camera, *appCtx.mvpApplicator );
   }
 
   void
@@ -82,9 +74,7 @@ public:
 private:
 
   float m_timer { 0.f };
-  nxgl::gfx::GLPolygon m_poly { GL_DYNAMIC_DRAW, 4 };
-  nxgl::gfx::GLPolygon m_polyFill { GL_DYNAMIC_DRAW, 4 };
-
+  nxgl::gfx::GLPolygon m_poly { GL_DYNAMIC_DRAW, 7 };
 };
 
 }

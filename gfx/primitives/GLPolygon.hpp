@@ -12,18 +12,20 @@ class GLPolygon
 
 public:
 
+  ////////////////////////////////////////////////////////////////////////////////
+  /// PUBLIC:
+  ///
+  /// \param bufferUsage GL_STATIC_DRAW, GL_DYNAMIC_DRAW, etc
+  /// \param edges edges in polygon
   GLPolygon( GLenum bufferUsage, uint8_t edges )
     : m_vao( GLData::createVAO() ),
-      m_vbo( bufferUsage, ( GLsizeiptr )( edges + 1 ), nullptr ),
+      m_vbo( bufferUsage, ( GLsizeiptr )( ( edges + 1 ) * 2 ), nullptr ),
       m_ibo( bufferUsage, ( GLsizeiptr )( edges * 3 ), nullptr ),
+      m_iboFill( bufferUsage, ( GLsizeiptr )( edges * 3 ), nullptr ),
       m_edges( edges )
   {
-    // vbo size = edges + 1 because we use the triangle fan, which gives a pivot point in the center
-    //                      so, 4 points in a rectangle and then 1 point in the center.
-    // vbo size = ( edges + 1 ) * 2 because the outline is 1st-class citizen of the buffer
-
-    // ibo size = edges * 3 because that's how many triangles we need to create
-    // ibo size = ( edges * 3 ) * 2 because of the outline
+    // the VBO contains both the fill and outline data
+    // there are two IBOs: 1) for outline, 2) for fill
 
     // if you have more complex triangle fan-based shapes, then use a different approach
     assert( edges > 2 && edges < INT8_MAX );
@@ -46,9 +48,19 @@ public:
     mvpApplicator.applyMVP( mvp );
 
     GLExec( glDrawElements( GL_TRIANGLE_FAN,
-                            m_vbo.size(),
+                            m_ibo.size(),
                             GL_UNSIGNED_BYTE,
                             nullptr ) );
+
+    m_iboFill.bind();
+    m_vao.bind();
+
+    m_modelFill = m_model;
+    m_modelFill.setScale( m_model.getScale() * .8f );
+    mvp = m_modelFill.getTranslation( camera );
+    mvpApplicator.applyMVP( mvp );
+
+    GLExec( glDrawElements( GL_TRIANGLE_FAN, m_iboFill.size(), GL_UNSIGNED_BYTE, nullptr ) );
   }
 
   ////////////////////////////////////////////////////////////////////////////////
@@ -61,7 +73,7 @@ public:
 
   ////////////////////////////////////////////////////////////////////////////////
   /// PUBLIC:
-  void setColor( const IColorable& colorizer )
+  void setOutlineColor( const IColorable& colorizer )
   {
     for ( uint32_t vertexIndex = 0;
           vertexIndex < m_edges + 1;
@@ -73,6 +85,19 @@ public:
 
   ////////////////////////////////////////////////////////////////////////////////
   /// PUBLIC:
+  void setFillColor( const IColorable& colorizer )
+  {
+    for ( uint32_t vertexIndex = m_edges + 1;
+          vertexIndex < ( m_edges + 1 ) * 2;
+          ++vertexIndex )
+    {
+      setColor( vertexIndex, colorizer( vertexIndex ) );
+    }
+  }
+
+
+  ////////////////////////////////////////////////////////////////////////////////
+  /// PUBLIC:
   GLBlend& getBlender() { return m_blender; }
 
   ////////////////////////////////////////////////////////////////////////////////
@@ -81,6 +106,8 @@ public:
 
 private:
 
+  ////////////////////////////////////////////////////////////////////////////////
+  /// PRIVATE:
   void createVertices()
   {
     // divide a circle by the number of edges
@@ -97,7 +124,7 @@ private:
 
     // put the data in a temporary buffer, so we can dump the data all at once
     // and this provides some better debugging opportunities
-    std::vector< GLData > vertexBuffer( ( m_edges + 1 ) * 2 );
+    std::vector< GLData > vertexBuffer( m_edges + 1 );
     std::vector< GLubyte > indexBuffer( m_edges * 3 );
 
     vertexBuffer[ 0 ] = { { 0, 0 }, white };
@@ -133,11 +160,21 @@ private:
       }
     }
 
-    // fill the buffers
-    m_vbo.fill( vertexBuffer.data() );
+
+    m_vbo.setDataRange( 0, m_edges + 1, vertexBuffer.data() );
+    m_vbo.setDataRange( m_edges + 1, m_edges + 1, vertexBuffer.data() );
     m_ibo.fill( indexBuffer.data() );
+
+    std::transform(
+      indexBuffer.begin(),
+      indexBuffer.end(),
+      indexBuffer.begin(), [ & ]( GLubyte index ) { return index + m_edges; } );
+
+    m_iboFill.fill( indexBuffer.data() );
   }
 
+  ////////////////////////////////////////////////////////////////////////////////
+  /// PRIVATE:
   void setColor( uint32_t index, const nxgl::nxColor& color )
   {
     assert( sizeof( GLData ) * index + sizeof( nxgl::nxVec2 ) < m_vbo.size() );
@@ -155,12 +192,14 @@ private:
 
   GLVbo< GLData > m_vbo;
   GLIbo< GLubyte > m_ibo;
+  GLIbo< GLubyte > m_iboFill;
   GLVao m_vao;
 
   GLubyte m_edges { 0 };
 
   GLBlend m_blender;
   GLModel m_model;
+  GLModel m_modelFill;
 
 };
 
