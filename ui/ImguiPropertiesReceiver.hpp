@@ -26,10 +26,6 @@ public:
     pDrawList->AddRect( { winPos.x + winSize.x / 2.f - offset, winPos.y + winSize.y / 2.f - offset },
                         { winPos.x + winSize.x / 2.f + offset, winPos.y + winSize.y / 2.f + offset },
                         ImColor( 0.f, 1.f, 0.f, 1.f ) );
-
-    pDrawList->AddRect( { winPos.x + winSize.x / 2.f, winPos.y + winSize.y / 2.f },
-                        { winPos.x + winSize.x / 2.f + size, winPos.y + winSize.y / 2.f + size },
-                        ImColor( 1.f, 0.f, 1.f, 1.f ) );
   }
 };
 
