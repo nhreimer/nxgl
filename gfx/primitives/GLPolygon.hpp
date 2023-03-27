@@ -3,6 +3,7 @@
 
 #include "gfx/shapes/IMVPApplicator.hpp"
 #include "gfx/shapes/IColorable.hpp"
+#include "gfx/shapes/IGenerator.hpp"
 
 namespace nxgl::gfx
 {
@@ -37,6 +38,43 @@ public:
 
   ////////////////////////////////////////////////////////////////////////////////
   /// PUBLIC:
+  ///
+  /// \param bufferUsage GL_STATIC_DRAW, GL_DYNAMIC_DRAW, etc
+  /// \param edges edges in polygon
+  /// \param generator the vertex and index generator. do not generate indices for the outline
+  GLPolygon( GLenum bufferUsage, uint8_t edges, IGenerator< GLData >& generator )
+    : m_vao( GLData::createVAO() ),
+      m_vbo( bufferUsage, ( GLsizeiptr )( ( edges + 1 ) * 2 ), nullptr ),
+      m_ibo( bufferUsage, ( GLsizeiptr )( edges * 3 ), nullptr ),
+      m_iboFill( bufferUsage, ( GLsizeiptr )( edges * 3 ), nullptr ),
+      m_edges( edges ),
+      m_glDrawMode( generator.getMode() )
+  {
+    // the VBO contains both the fill and outline data
+    // there are two IBOs: 1) for outline, 2) for fill
+
+    // if you have more complex triangle fan-based shapes, then use a different approach
+    assert( edges > 2 && edges < INT8_MAX );
+
+    m_vbo.bind();
+
+    auto vertexBuffer = generator.generateVertices( edges );
+    auto indexBuffer = generator.generateIndices( edges );
+
+    m_vbo.setDataRange( 0, m_edges + 1, vertexBuffer.data() );
+    m_vbo.setDataRange( m_edges + 1, m_edges + 1, vertexBuffer.data() );
+    m_ibo.fill( indexBuffer.data() );
+
+    std::transform(
+      indexBuffer.begin(),
+      indexBuffer.end(),
+      indexBuffer.begin(), [ & ]( GLubyte index ) { return index + m_edges; } );
+
+    m_iboFill.fill( indexBuffer.data() );
+  }
+
+  ////////////////////////////////////////////////////////////////////////////////
+  /// PUBLIC:
   void draw( const GLCamera& camera, IMVPApplicator& mvpApplicator )
   {
     // draw: bind() -> blend() -> transform() -> draw()
@@ -47,7 +85,7 @@ public:
     auto mvp = m_model.getTranslation( camera );
     mvpApplicator.applyMVP( mvp );
 
-    GLExec( glDrawElements( GL_TRIANGLE_FAN,
+    GLExec( glDrawElements( m_glDrawMode,
                             m_ibo.size(),
                             GL_UNSIGNED_BYTE,
                             nullptr ) );
@@ -60,7 +98,7 @@ public:
     mvp = m_modelFill.getTranslation( camera );
     mvpApplicator.applyMVP( mvp );
 
-    GLExec( glDrawElements( GL_TRIANGLE_FAN, m_iboFill.size(), GL_UNSIGNED_BYTE, nullptr ) );
+    GLExec( glDrawElements( m_glDrawMode, m_iboFill.size(), GL_UNSIGNED_BYTE, nullptr ) );
   }
 
   ////////////////////////////////////////////////////////////////////////////////
@@ -73,7 +111,7 @@ public:
 
   ////////////////////////////////////////////////////////////////////////////////
   /// PUBLIC:
-  void setOutlineColor( const IColorable& colorizer )
+  void setOutlineColor( IColorable& colorizer )
   {
     for ( uint32_t vertexIndex = 0;
           vertexIndex < m_edges + 1;
@@ -85,13 +123,13 @@ public:
 
   ////////////////////////////////////////////////////////////////////////////////
   /// PUBLIC:
-  void setFillColor( const IColorable& colorizer )
+  void setFillColor( IColorable& colorizer )
   {
-    for ( uint32_t vertexIndex = m_edges + 1;
+    for ( uint32_t vertexIndex = m_edges + 1, colorIndex = 0;
           vertexIndex < ( m_edges + 1 ) * 2;
-          ++vertexIndex )
+          ++vertexIndex, ++colorIndex )
     {
-      setColor( vertexIndex, colorizer( vertexIndex ) );
+      setColor( vertexIndex, colorizer( colorIndex ) );
     }
   }
 
@@ -190,8 +228,13 @@ private:
 
 private:
 
+  // VBO: outline and fill
   GLVbo< GLData > m_vbo;
+
+  // IBO: outline
   GLIbo< GLubyte > m_ibo;
+
+  // IBO: fill
   GLIbo< GLubyte > m_iboFill;
   GLVao m_vao;
 
@@ -201,6 +244,7 @@ private:
   GLModel m_model;
   GLModel m_modelFill;
 
+  GLenum m_glDrawMode { GL_TRIANGLE_FAN };
 };
 
 }

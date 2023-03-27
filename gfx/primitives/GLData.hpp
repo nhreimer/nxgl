@@ -25,6 +25,17 @@ struct GLData
   nxgl::nxVec2 position;  // x, y
   nxgl::nxColor color;    // r, g, b, a
 
+  /// used for vertex generation. generators expect to create the data that the
+  /// VAO describes
+  /// \param position
+  /// \return
+  static GLData createData( const nxgl::nxVec2& position )
+  {
+    return { position, { 1.f, 1.f, 1.f, 1.f } };
+  }
+
+  /// used for telling OpenGL how the VBO data layout is
+  /// \return
   static GLVao createVAO()
   {
     GLVao vao;

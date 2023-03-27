@@ -7,7 +7,7 @@ namespace nxgl::gfx
 {
 struct IColorable
 {
-  virtual nxgl::nxColor operator()( uint32_t index ) const = 0;
+  virtual nxgl::nxColor operator()( uint32_t index ) = 0;
 };
 
 /***
@@ -20,7 +20,7 @@ public:
   void setColor( const nxgl::nxColor& color ) { m_color = color; }
   [[nodiscard]] nxgl::nxColor getColor() const { return m_color; }
 
-  nxgl::nxColor operator()( uint32_t index ) const override
+  nxgl::nxColor operator()( uint32_t index ) override
   {
     return m_color;
   }
@@ -42,14 +42,17 @@ public:
   /// \param endColor the end of the spectrum
   void setColors( uint32_t intervals, // this does NOT refer to the number of vertices
                   const nxColor& startColor,
-                  const nxColor& endColor )
+                  const nxColor& endColor,
+                  float reversePercentage = 1.f )
   {
     assert( intervals > 1 );
+    assert( reversePercentage >= 0.f && reversePercentage <= 1.f );
 
     m_intervals = intervals;
     m_startColor = startColor;
     m_endColor = endColor;
     m_deltaColor = endColor - startColor;
+    m_reverseDirectionPercentage = 1.f - reversePercentage;
   }
 
   void setIntervals( uint32_t intervals )
@@ -58,12 +61,17 @@ public:
     m_intervals = intervals;
   }
 
-  nxgl::nxColor operator()( uint32_t index ) const override
+  nxgl::nxColor operator()( uint32_t index ) override
   {
     if ( index == 0 ) return m_startColor;
     if ( index == m_intervals - 1 ) return m_endColor;
 
     auto percentage = ( float )( index % m_intervals ) / ( float )m_intervals;
+
+    if ( ( float )( index + 1 ) / ( float )m_intervals >= m_reverseDirectionPercentage )
+    {
+      percentage += m_reverseDirectionPercentage;
+    }
 
     return { m_deltaColor.r * percentage + m_startColor.r,
              m_deltaColor.g * percentage + m_startColor.g,
@@ -78,6 +86,8 @@ private:
   nxColor m_deltaColor;
   nxColor m_startColor;
   nxColor m_endColor;
+
+  float m_reverseDirectionPercentage { 0.f };
 
 };
 

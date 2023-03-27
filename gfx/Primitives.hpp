@@ -14,5 +14,6 @@
 #include "gfx/primitives/GLCamera.hpp"
 #include "gfx/primitives/GLBounds.hpp"
 #include "gfx/primitives/GLPolygon.hpp"
+#include "gfx/shapes/IGenerator.hpp"
 
 #endif //INC_9262AEA9A5C3456785341D5C5312672D
