@@ -1,6 +1,8 @@
 #ifndef INC_0C476FBFB28C4E8583578F242F0CC8BE
 #define INC_0C476FBFB28C4E8583578F242F0CC8BE
 
+#include "utilities/Math.hpp"
+
 namespace nxgl::gfx
 {
 
@@ -8,13 +10,13 @@ class GLTriangleCircle : public GLObject
 {
 public:
 
-  explicit GLTriangleCircle( uint8_t triangles, float radius = 50.f )
+  GLTriangleCircle( uint8_t triangles, float gap )
     : m_vbo( GL_DYNAMIC_DRAW, triangles * 3 ),
       m_vao( GLData::createVAO() ),
       m_triangles( triangles ),
-      m_radius( 50.f )
+      m_gap( gap )
   {
-    getModel().setScale( { radius, radius } );
+    assert( gap >= 0.f && gap <= 1.f );
     setBuffer();
   }
 
@@ -51,20 +53,66 @@ private:
     std::vector< GLData > vertexBuffer( m_triangles * 3 );
 
     nxColor white { 1.f, 1.f, 1.f, 1.f };
+    nxColor red { 1.f, 0.f, 0.f, 1.f };
+    nxColor green { 0.f, 1.f, 0.f, 1.f };
+    nxColor blue { 0.f, 0.f, 1.f, 1.f };
 
-    auto angle = NX_TAU / ( float )m_triangles;
+    auto angle = ( NX_TAU / ( float )m_triangles );
 
     float previousAngle = 0.f;
 
-    for ( int i = 0, idx = 0; i < m_triangles; i += 3 )
+    float angleOffset = glm::radians( 45.f );
+
+    for ( int i = 0, idx = 0; i < m_triangles; ++i, idx += 3 )
     {
-      // A is always at the center
-      vertexBuffer[ idx ] = { { 0.f, 0.f }, white };
-      vertexBuffer[ idx + 1 ] = { { std::cos( previousAngle ), std::sin( previousAngle ) }, white };
+      nxColor color = white;
 
-      previousAngle += angle;
+      switch ( i )
+      {
+        case 0:
+          color = red;
+          break;
+        case 1:
+          color = white;
+          break;
+        case 2:
+          color = green;
+          break;
+        case 3:
+          color = blue;
+          break;
+        default:
+          break;
+      }
 
-      vertexBuffer[ idx + 2 ] = { { std::cos( previousAngle ), std::sin( previousAngle ) }, white };
+      // B
+      vertexBuffer[ idx + 1 ] =
+        {
+          { std::cos( previousAngle + angleOffset ),
+            std::sin( previousAngle + angleOffset ) },
+          color
+        };
+
+      // C
+      previousAngle = ( float )( i + 1 ) * angle;
+      vertexBuffer[ idx + 2 ] =
+        {
+          { std::cos( previousAngle + angleOffset ),
+            std::sin( previousAngle + angleOffset ) },
+          color
+        };
+
+      nxVec2 centroid {
+        ( ( vertexBuffer[ idx + 1 ].position.x +
+          vertexBuffer[ idx + 2 ].position.x ) / 3.f ) * m_gap,
+        ( ( vertexBuffer[ idx + 1 ].position.y +
+          vertexBuffer[ idx + 2 ].position.y ) / 3.f ) * m_gap
+      };
+
+      // A
+      vertexBuffer[ idx ] = { { centroid }, color };
+      vertexBuffer[ idx + 1 ].position *= m_gap;
+      vertexBuffer[ idx + 2 ].position *= m_gap;
     }
 
     m_vbo.fill( vertexBuffer.data() );
@@ -76,7 +124,8 @@ private:
   GLVao m_vao;
 
   uint8_t m_triangles { 0 };
-  float m_radius;
+
+  float m_gap;
 };
 
 }

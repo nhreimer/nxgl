@@ -40,7 +40,8 @@ public:
     ////////////////////////////////////////////////////////////////////////////////
 
     m_triCirc.getModel().setPosition( { 200.f, 200.f } );
-    m_triCirc.setColor( outerColorizer );
+    m_triCirc.getModel().setScale( { 100.f, 100.f } );
+//    m_triCirc.setColor( outerColorizer );
 
     ////////////////////////////////////////////////////////////////////////////////
   }
@@ -83,8 +84,8 @@ private:
 
   float m_timer { 0.f };
 
-  nxgl::gfx::GLPolygon m_polyBCA { GL_DYNAMIC_DRAW, 4 };
-  nxgl::gfx::GLTriangleCircle m_triCirc { 4 };
+  nxgl::gfx::GLPolygon m_polyBCA { GL_DYNAMIC_DRAW, 6 };
+  nxgl::gfx::GLTriangleCircle m_triCirc { 7, .5f };
   nxgl::gfx::GLModel * m_pModel { nullptr };
 };
 
