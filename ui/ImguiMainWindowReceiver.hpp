@@ -7,7 +7,6 @@
 #include "gfx/shapes/IColorable.hpp"
 
 #include "gfx/shapes/GLPolygon.hpp"
-#include "gfx/shapes/GLTriangleCircle.hpp"
 
 namespace nxgl::ui
 {
@@ -19,29 +18,35 @@ public:
 
   void initialize( ApplicationContext &appCtx, GLFWwindow *window ) override
   {
-    m_pModel = &m_polyBCA.getModel();
+    m_pModel = &m_hexa.getModel();
 
     nxgl::gfx::SpectrumColorizer outerColorizer;
-    outerColorizer.setColors( 5, { 0.f, 1.f, 0.f, 1.f }, { 0.f, 1.f, 1.f, 1.f } );
+    outerColorizer.setColors( 4, { 1.f, 1.f, 1.f, .5f }, { 0.f, 0.f, 0.f, .5f } );
 
-    nxgl::gfx::SpectrumColorizer innerColorizer;
-    innerColorizer.setColors( 5, { 1.f, 0.f, 0.f, 1.f }, { 1.f, 0.f, 1.f, 1.f } );
+    nxgl::gfx::IntervalColorizer intervalColorizer;
+    intervalColorizer.setColors(
+      {
+        // triangle 1
+        { 0.f, 0.f, 0.f, 0.f },
+        { 0.f, 1.f, 0.f, .5f },
+        { 0.f, 1.f, 0.f, .5f },
+
+        // triangle 2
+        { 0.f, 0.f, 0.f, 0.f },
+        { 0.f, 0.f, 1.f, .5f },
+        { 0.f, 0.f, 1.f, .5f }
+      } );
 
     auto size = 100.f;
 
     ////////////////////////////////////////////////////////////////////////////////
 
-    m_polyBCA.getModel().setScale( { size, size } );
-    m_polyBCA.getModel().setPosition( { appCtx.windowSize.x / 2.f,
+    m_hexa.getModel().setScale( { size, size } );
+    m_hexa.getModel().setPosition( { appCtx.windowSize.x / 2.f,
                                         appCtx.windowSize.y / 2.f } );
-    m_polyBCA.setFillColor( innerColorizer );
-    m_polyBCA.setOutlineColor( outerColorizer );
-
-    ////////////////////////////////////////////////////////////////////////////////
-
-    m_triCirc.getModel().setPosition( { 200.f, 200.f } );
-    m_triCirc.getModel().setScale( { 100.f, 100.f } );
-//    m_triCirc.setColor( outerColorizer );
+    m_hexa.setFillColor( intervalColorizer );
+    m_hexa.setOutlineColor( outerColorizer );
+    m_hexa.setOutlinePercentage( .1f );
 
     ////////////////////////////////////////////////////////////////////////////////
   }
@@ -51,15 +56,14 @@ public:
     m_timer += frameDeltaInMS;
     if ( m_timer >= 100.f )
     {
-      m_polyBCA.getModel().setAngle( m_polyBCA.getModel().getAngle() - 1.f );
+      m_hexa.getModel().setAngle( m_hexa.getModel().getAngle() - 1.f );
       m_timer = 0.f;
     }
   }
 
   void draw( ApplicationContext &appCtx, GLFWwindow *window ) override
   {
-    m_polyBCA.draw( appCtx.camera, *appCtx.mvpApplicator );
-    m_triCirc.draw( appCtx.camera, *appCtx.mvpApplicator );
+    m_hexa.draw( appCtx.camera, *appCtx.mvpApplicator );
   }
 
   void
@@ -84,8 +88,8 @@ private:
 
   float m_timer { 0.f };
 
-  nxgl::gfx::GLPolygon m_polyBCA { GL_DYNAMIC_DRAW, 6 };
-  nxgl::gfx::GLTriangleCircle m_triCirc { 7, .5f };
+  nxgl::gfx::GLPolygon m_hexa { GL_DYNAMIC_DRAW, 4 };
+
   nxgl::gfx::GLModel * m_pModel { nullptr };
 };
 

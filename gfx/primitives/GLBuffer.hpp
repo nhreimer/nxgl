@@ -12,14 +12,15 @@ public:
   ////////////////////////////////////////////////////////////////////////////////
   /// PUBLIC:
   GLBuffer( GLenum bufferUsage, GLsizeiptr szBuffer )
-  : GLBuffer( bufferUsage, szBuffer, nullptr )
+    : GLBuffer( bufferUsage, szBuffer, nullptr )
   {}
 
   ////////////////////////////////////////////////////////////////////////////////
   /// PUBLIC:
   GLBuffer( GLenum bufferUsage, GLsizeiptr szBuffer, const TData * pReadBuffer )
     : m_bufferUsage( bufferUsage ),
-      m_szBuffer( szBuffer )
+      m_szBuffer( szBuffer ),
+      m_cntBuffer( szBuffer / sizeof( TData ) )
   {
     // generate the id
     GLExec( glGenBuffers( 1, &m_bufferId ) );
@@ -137,12 +138,19 @@ public:
   /// \return the size of the buffer in bytes
   [[nodiscard]] inline GLsizeiptr size() const { return m_szBuffer; }
 
+  ////////////////////////////////////////////////////////////////////////////////
+  /// PUBLIC:
+  ///
+  /// \return the element count
+  [[nodiscard]] inline GLsizeiptr elementCount() const { return m_cntBuffer; }
+
 private:
 
   GLuint m_bufferId { 0 };
 
   GLenum m_bufferUsage { GL_ARRAY_BUFFER };
-  GLsizeiptr m_szBuffer { 0 };
+  GLsizeiptr m_szBuffer { 0 };  // number of bytes in the buffer
+  GLsizeiptr m_cntBuffer { 0 }; // number of elements in the buffer
 };
 
 }

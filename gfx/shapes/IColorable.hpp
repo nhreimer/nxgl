@@ -10,6 +10,10 @@ struct IColorable
   virtual nxgl::nxColor operator()( uint32_t index ) = 0;
 };
 
+////////////////////////////////////////////////////////////////////////////////
+/// SOLID
+////////////////////////////////////////////////////////////////////////////////
+
 /***
  * creates a solid / uniform color
  */
@@ -28,6 +32,42 @@ public:
 private:
   nxgl::nxColor m_color;
 };
+
+////////////////////////////////////////////////////////////////////////////////
+/// INTERVALS
+////////////////////////////////////////////////////////////////////////////////
+
+class IntervalColorizer : public IColorable
+{
+public:
+
+  IntervalColorizer() = default;
+
+  explicit IntervalColorizer( const std::vector< nxColor >& colors )
+    : m_colors( colors )
+  {}
+
+  /// \param intervals the number of colors to bounce between on the spectrum of start and end.
+  /// \param startColor the start of the spectrum
+  /// \param endColor the end of the spectrum
+  void setColors( const std::vector< nxColor >& colors )
+  {
+    m_colors = colors;
+  }
+
+  nxgl::nxColor operator()( uint32_t index ) override
+  {
+    assert( !m_colors.empty() );
+    return m_colors[ index % m_colors.size() ];
+  }
+
+private:
+  std::vector< nxColor > m_colors;
+};
+
+////////////////////////////////////////////////////////////////////////////////
+/// SPECTRUM
+////////////////////////////////////////////////////////////////////////////////
 
 /***
  * creates gradients across a spectrum

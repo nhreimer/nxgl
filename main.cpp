@@ -102,6 +102,32 @@ static void runApplication( uint32_t width,       // initial width
     delete pEventReceiver;
 }
 
+static void generate( uint16_t granularity, float width )
+{
+  std::vector< nxgl::gfx::GLData > buffer;
+
+  auto angle = nxgl::NX_TAU / ( float )granularity;
+
+  auto vertexAngle = 0.f;
+
+  for ( uint16_t i = 0; i < granularity; ++i )
+  {
+    // outer one
+    buffer.push_back( { { std::cos( angle ) * width, std::sin( angle ) * width },
+                        { 1.f, 1.f, 1.f, 1.f } } );
+
+    // inner one
+    buffer.push_back( { { std::cos( angle ), std::sin( angle ) },
+                        { 1.f, 1.f, 1.f, 1.f } } );
+
+    vertexAngle = angle * ( float )i;
+
+    // 2nd outer one
+    buffer.push_back( { { std::cos( angle ) * width, std::sin( angle ) * width },
+                        { 1.f, 1.f, 1.f, 1.f } } );
+  }
+}
+
 int main()
 {
   nxgl::SLog::initializeConsole();

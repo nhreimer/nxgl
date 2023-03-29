@@ -31,9 +31,9 @@ public:
   /// PUBLIC:
   virtual void draw( const GLCamera& camera, IMVPApplicator& mvpApplicator ) = 0;
 
-protected:
-
-  void setColor( const GLVbo< GLData >& vbo, uint32_t index, const nxgl::nxColor& color )
+  ////////////////////////////////////////////////////////////////////////////////
+  /// PUBLIC:
+  static void setColor( const GLVbo< GLData >& vbo, uint32_t index, const nxgl::nxColor& color )
   {
     assert( sizeof( GLData ) * index + sizeof( nxgl::nxVec2 ) < vbo.size() );
 

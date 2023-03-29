@@ -4,7 +4,6 @@
 #include "gfx/shapes/GLObject.hpp"
 #include "gfx/shapes/IMVPApplicator.hpp"
 #include "gfx/shapes/IColorable.hpp"
-#include "gfx/shapes/IGenerator.hpp"
 
 namespace nxgl::gfx
 {
@@ -22,48 +21,14 @@ public:
   /// \param edges edges in polygon
   GLPolygon( GLenum bufferUsage, uint8_t edges )
     : m_vao( GLData::createVAO() ),
-      m_vbo( bufferUsage, ( GLsizeiptr )( ( edges + 1 ) * 2 ), nullptr ),
-      m_ibo( bufferUsage, ( GLsizeiptr )( edges * 3 ), nullptr ),
-      m_iboFill( bufferUsage, ( GLsizeiptr )( edges * 3 ), nullptr ),
-      m_edges( edges )
+      m_vbo( bufferUsage, ( GLsizeiptr )( ( edges * 3 ) * 2 ), nullptr ),
+      m_fillBufferStartIndex( edges * 3 )
   {
-    // the VBO contains both the fill and outline data
-    // there are two IBOs: 1) for outline, 2) for fill
-
-    // if you have more complex triangle fan-based shapes, then use a different approach
-    assert( edges > 2 && edges < INT8_MAX );
-
-    // this works the smoothest with the SpectrumColorizer, so this is the default
-    // use the other ctor to provide a custom GLData generator
-    CCWBCAPolygon< GLData > polygonCreator;
-    m_vbo.bind();
-    setBuffers( polygonCreator );
-  }
-
-  ////////////////////////////////////////////////////////////////////////////////
-  /// PUBLIC:
-  ///
-  /// \param bufferUsage GL_STATIC_DRAW, GL_DYNAMIC_DRAW, etc
-  /// \param edges edges in polygon
-  /// \param generator the vertex and index generator. do not generate indices for the outline
-  GLPolygon( GLenum bufferUsage,
-             uint8_t edges,
-             IGenerator< GLData >& generator )
-    : m_vao( GLData::createVAO() ),
-      m_vbo( bufferUsage, ( GLsizeiptr )( ( edges + 1 ) * 2 ), nullptr ),
-      m_ibo( bufferUsage, ( GLsizeiptr )( edges * 3 ), nullptr ),
-      m_iboFill( bufferUsage, ( GLsizeiptr )( edges * 3 ), nullptr ),
-      m_edges( edges ),
-      m_glDrawMode( generator.getMode() )
-  {
-    // the VBO contains both the fill and outline data
-    // there are two IBOs: 1) for outline, 2) for fill
-
     // if you have more complex triangle fan-based shapes, then use a different approach
     assert( edges > 2 && edges < INT8_MAX );
 
     m_vbo.bind();
-    setBuffers( generator );
+    createVertices( edges );
   }
 
   ////////////////////////////////////////////////////////////////////////////////
@@ -73,19 +38,15 @@ public:
     // bind the VAO
     m_vao.bind();
     {
-      // bind the first IBO
+      // bind the VBO
+      m_vbo.bind();
       {
-        m_ibo.bind();
         getBlender().blend();
         drawFill( camera, mvpApplicator );
-        m_ibo.unbind();
-      }
-      // bind the second IBO
-      {
-        m_iboFill.bind();
         drawOutline( camera, mvpApplicator );
-        m_iboFill.unbind();
       }
+      // unbind the VBO
+      m_vbo.unbind();
     }
     // unbind the VAO
     m_vao.unbind();
@@ -96,7 +57,7 @@ public:
   void setOutlineColor( IColorable& colorizer )
   {
     for ( uint32_t vertexIndex = 0;
-          vertexIndex < m_edges + 1;
+          vertexIndex < m_fillBufferStartIndex;
           ++vertexIndex )
     {
       setColor( m_vbo, vertexIndex, colorizer( vertexIndex ) );
@@ -107,8 +68,8 @@ public:
   /// PUBLIC:
   void setFillColor( IColorable& colorizer )
   {
-    for ( uint32_t vertexIndex = m_edges + 1, colorIndex = 0;
-          vertexIndex < ( m_edges + 1 ) * 2;
+    for ( uint32_t vertexIndex = m_fillBufferStartIndex, colorIndex = 0;
+          vertexIndex < m_vbo.elementCount();
           ++vertexIndex, ++colorIndex )
     {
       setColor( m_vbo, vertexIndex, colorizer( colorIndex ) );
@@ -136,10 +97,7 @@ private:
     auto mvp = getModel().getTranslation( camera );
     mvpApplicator.applyMVP( mvp );
 
-    GLExec( glDrawElements( m_glDrawMode,
-                            m_ibo.size(),
-                            GL_UNSIGNED_BYTE,
-                            nullptr ) );
+    GLExec( glDrawArrays( GL_TRIANGLE_FAN, 0, m_fillBufferStartIndex ) );
   }
 
   ////////////////////////////////////////////////////////////////////////////////
@@ -152,49 +110,73 @@ private:
       m_modelFill.setScale( m_modelFill.getScale() * ( 1.f - m_outlinePercentage ) );
       auto mvp = m_modelFill.getTranslation( camera );
       mvpApplicator.applyMVP( mvp );
-
-      GLExec( glDrawElements( m_glDrawMode, m_iboFill.size(), GL_UNSIGNED_BYTE, nullptr ) );
+      GLExec(
+          glDrawArrays( GL_TRIANGLE_FAN, m_fillBufferStartIndex, m_fillBufferStartIndex ) );
     }
   }
 
   ////////////////////////////////////////////////////////////////////////////////
   /// PRIVATE:
-  void setBuffers( IGenerator< GLData >& generator )
+  void createVertices( uint32_t edges )
   {
-    auto vertexBuffer = generator.generateVertices( m_edges );
-    auto indexBuffer = generator.generateIndices( m_edges );
+    // divide a circle by the number of edges
+    // which is A(0, 0) -> B(0, 1) -> C(1, 1)
+    // note that C is slightly less than 1, 1 however
+    auto angle = nxgl::NX_TAU / ( float )edges;
 
-    m_vbo.setDataRange( 0, m_edges + 1, vertexBuffer.data() );
-    m_vbo.setDataRange( m_edges + 1, m_edges + 1, vertexBuffer.data() );
-    m_ibo.fill( indexBuffer.data() );
+    // move counterclockwise starting at the center (0, 0)
+    // ABC
+    // ACD
+    // ADE ...
 
-    std::transform(
-      indexBuffer.begin(),
-      indexBuffer.end(),
-      indexBuffer.begin(), [ & ]( GLubyte index ) { return index + m_edges; } );
+    // get the first two points and then we only need to calculate the third
+    // every loop
 
-    m_iboFill.fill( indexBuffer.data() );
+    nxgl::nxColor white { 1.f, 1.f, 1.f, 1.f };
+
+    // this is fixed
+    nxgl::nxVec2 pointA { 0, 0 };
+
+    // set point B
+    nxgl::nxVec2 pointB { std::cos( 0 ), std::sin( 0 ) };
+
+    uint32_t posInBuffer = 0;
+
+    std::vector< GLData > vertexBuffer( m_vbo.elementCount() );
+
+    for ( uint32_t i = 0; i < edges; ++i )
+    {
+      auto thirdPointAngle = ( float )( i + 1 ) * angle;
+      nxgl::nxVec2 pointC { std::cos( thirdPointAngle ), std::sin( thirdPointAngle ) };
+
+      // assign the outline shape
+      vertexBuffer[ posInBuffer + 0 ] = { pointA, white };
+      vertexBuffer[ posInBuffer + 1 ] = { pointB, white };
+      vertexBuffer[ posInBuffer + 2 ] = { pointC, white };
+
+      // assign the fill shape
+      vertexBuffer[ posInBuffer + m_fillBufferStartIndex ]     = { pointA, white };
+      vertexBuffer[ posInBuffer + m_fillBufferStartIndex + 1 ] = { pointB, white };
+      vertexBuffer[ posInBuffer + m_fillBufferStartIndex + 2 ] = { pointC, white };
+
+      posInBuffer += 3;
+      pointB = pointC;
+    }
+
+    m_vbo.fill( vertexBuffer.data() );
   }
 
 private:
 
   // VBO: outline and fill
   GLVbo< GLData > m_vbo;
-
-  // IBO: outline
-  GLIbo< GLubyte > m_ibo;
-
-  // IBO: fill
-  GLIbo< GLubyte > m_iboFill;
   GLVao m_vao;
-
-  GLubyte m_edges { 0 };
 
   GLModel m_modelFill;
 
-  GLenum m_glDrawMode { GL_TRIANGLE_FAN };
+  float m_outlinePercentage { 0.f };
 
-  float m_outlinePercentage { .2f };
+  uint32_t m_fillBufferStartIndex { 0 };
 };
 
 }
