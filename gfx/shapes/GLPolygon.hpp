@@ -4,6 +4,7 @@
 #include "gfx/shapes/GLObject.hpp"
 #include "gfx/shapes/IMVPApplicator.hpp"
 #include "gfx/shapes/IColorable.hpp"
+#include "gfx/shapes/TriangleData.hpp"
 
 namespace nxgl::gfx
 {
@@ -29,6 +30,27 @@ public:
 
     m_vbo.bind();
     createVertices( edges );
+  }
+
+  ////////////////////////////////////////////////////////////////////////////////
+  /// PUBLIC:
+  TriangleData getTriangle( uint32_t index )
+  {
+    assert( index < m_vbo.elementCount() );
+
+    GLData triangleData[ 3 ];
+    m_vbo.getDataRange( ( GLsizeiptr )( sizeof( GLData ) * index ), 3, triangleData );
+
+    auto model = getModel();
+    auto scale = model.getScale();
+    auto position = model.getPosition();
+
+    return
+    {
+      triangleData[ 0 ].position * scale + position,
+      triangleData[ 1 ].position * scale + position,
+      triangleData[ 2 ].position * scale + position
+    };
   }
 
   ////////////////////////////////////////////////////////////////////////////////

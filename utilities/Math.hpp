@@ -1,6 +1,8 @@
 #ifndef INC_97E6A2BF49EC4FDF8B0B4A07BB9D3675
 #define INC_97E6A2BF49EC4FDF8B0B4A07BB9D3675
 
+#include "gfx/shapes/TriangleData.hpp"
+
 namespace nxgl
 {
 
@@ -8,11 +10,31 @@ class Math
 {
 public:
 
-  static nxVec3 getTriangleAngles( const nxVec2& a, const nxVec2& b, const nxVec2& c )
+  static float getSign( const nxVec2& p1, const nxVec2& p2, const nxVec2& p3 )
   {
-    auto lengthA = getLineLength( b, c );
-    auto lengthB = getLineLength( a, c );
-    auto lengthC = getLineLength( a, b );
+    return ( p1.x - p3.x ) * ( p2.y - p3.y ) -
+           ( p2.x - p3.x ) * ( p1.y - p3.y );
+  }
+
+  // https://stackoverflow.com/questions/2049582/how-to-determine-if-a-point-is-in-a-2d-triangle
+  static bool isPointInTriangle( const nxVec2& pt, const gfx::TriangleData& triangle )
+  {
+    auto d1 = getSign( pt, triangle.pointA, triangle.pointB );
+    auto d2 = getSign( pt, triangle.pointB, triangle.pointC );
+    auto d3 = getSign( pt, triangle.pointC, triangle.pointA );
+
+    auto hasNeg = ( d1 < 0 ) || ( d2 < 0 ) || ( d3 < 0 );
+    auto hasPos = ( d1 > 0 ) || ( d2 > 0 ) || ( d3 > 0 );
+
+    return !( hasNeg && hasPos );
+  }
+
+  static nxVec3 getTriangleAngles( const nxgl::gfx::TriangleData& triangleData )
+  //static nxVec3 getTriangleAngles( const nxVec2& a, const nxVec2& b, const nxVec2& c )
+  {
+    auto lengthA = getLineLength( triangleData.pointB, triangleData.pointC );
+    auto lengthB = getLineLength( triangleData.pointA, triangleData.pointC );
+    auto lengthC = getLineLength( triangleData.pointA, triangleData.pointB );
 
     auto angleA = getAngle( lengthA, lengthB, lengthC );
     auto angleB = getAngle( lengthB, lengthC, lengthA );

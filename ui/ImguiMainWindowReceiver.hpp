@@ -7,6 +7,7 @@
 #include "gfx/shapes/IColorable.hpp"
 
 #include "gfx/shapes/GLPolygon.hpp"
+#include "utilities/Math.hpp"
 
 namespace nxgl::ui
 {
@@ -48,6 +49,8 @@ public:
     m_hexa.setOutlineColor( outerColorizer );
     m_hexa.setOutlinePercentage( .1f );
 
+    m_triangle = m_hexa.getTriangle( 0 );
+
     ////////////////////////////////////////////////////////////////////////////////
   }
 
@@ -56,7 +59,7 @@ public:
     m_timer += frameDeltaInMS;
     if ( m_timer >= 100.f )
     {
-      m_hexa.getModel().setAngle( m_hexa.getModel().getAngle() - 1.f );
+//      m_hexa.getModel().setAngle( m_hexa.getModel().getAngle() - 1.f );
       m_timer = 0.f;
     }
   }
@@ -77,9 +80,22 @@ public:
     {
       double xpos, ypos;
       glfwGetCursorPos( window, &xpos, &ypos );
-      if ( m_pModel->getBounds().contains( { xpos, ypos } ) )
+
+      nxVec2 pos { ( float )xpos, ( float )ypos };
+
+      if ( m_pModel->getBounds().contains( pos ) )
       {
-        LOG_DEBUG( "MATCH" );
+        LOG_DEBUG( "BB clicked!" );
+
+        if ( nxgl::Math::isPointInTriangle( pos, m_triangle ) )
+        {
+          LOG_DEBUG( "TRIANGLE clicked!" );
+        }
+
+        LOG_DEBUG( "\tpoint: {}, {}. ", pos.x, pos.y );
+        LOG_DEBUG( "\tA: {}, {}. ", m_triangle.pointA.x, m_triangle.pointA.y );
+        LOG_DEBUG( "\tB: {}, {}. ", m_triangle.pointB.x, m_triangle.pointB.y );
+        LOG_DEBUG( "\tC: {}, {}. ", m_triangle.pointC.x, m_triangle.pointC.y );
       }
     }
   }
@@ -87,10 +103,9 @@ public:
 private:
 
   float m_timer { 0.f };
-
   nxgl::gfx::GLPolygon m_hexa { GL_DYNAMIC_DRAW, 4 };
-
   nxgl::gfx::GLModel * m_pModel { nullptr };
+  nxgl::gfx::TriangleData m_triangle;
 };
 
 }
