@@ -4,7 +4,9 @@
 #include "gfx/shapes/GLObject.hpp"
 #include "gfx/shapes/IMVPApplicator.hpp"
 #include "gfx/shapes/IColorable.hpp"
-#include "gfx/shapes/TriangleData.hpp"
+#include "gfx/shapes/Triangle.hpp"
+
+#define NX_IDX_OFFSET ( m_fillBufferStartIndex + ( index * 3 ) )
 
 namespace nxgl::gfx
 {
@@ -23,10 +25,12 @@ public:
   GLPolygon( GLenum bufferUsage, uint8_t edges )
     : m_vao( GLData::createVAO() ),
       m_vbo( bufferUsage, ( GLsizeiptr )( ( edges * 3 ) * 2 ), nullptr ),
-      m_fillBufferStartIndex( edges * 3 )
+      m_fillBufferStartIndex( edges * 3 ),
+      m_edges( edges )
   {
     // if you have more complex triangle fan-based shapes, then use a different approach
-    assert( edges > 2 && edges < INT8_MAX );
+//    assert( edges > 2 && edges < INT8_MAX );
+    assert( edges > 0 );
 
     m_vbo.bind();
     createVertices( edges );
@@ -34,24 +38,27 @@ public:
 
   ////////////////////////////////////////////////////////////////////////////////
   /// PUBLIC:
-  TriangleData getTriangle( uint32_t index )
+  [[nodiscard]]
+  Triangle getTriangle( uint8_t index )
   {
-    assert( index < m_vbo.elementCount() );
+    GLData data[ 3 ];
+    m_vbo.getDataRange( NX_IDX_OFFSET, 3, data );
 
-    GLData triangleData[ 3 ];
-    m_vbo.getDataRange( ( GLsizeiptr )( sizeof( GLData ) * index ), 3, triangleData );
-
-    auto model = getModel();
-    auto scale = model.getScale();
-    auto position = model.getPosition();
+    auto pos = getModel().getPosition();
+    auto scale = getModel().getScale();
 
     return
     {
-      triangleData[ 0 ].position * scale + position,
-      triangleData[ 1 ].position * scale + position,
-      triangleData[ 2 ].position * scale + position
+      data[ 0 ].position * scale + pos,
+      data[ 1 ].position * scale + pos,
+      data[ 2 ].position * scale + pos
     };
   }
+
+  ////////////////////////////////////////////////////////////////////////////////
+  /// PUBLIC:
+  [[nodiscard]]
+  uint8_t getTriangleCount() const { return m_edges; }
 
   ////////////////////////////////////////////////////////////////////////////////
   /// PUBLIC:
@@ -64,8 +71,8 @@ public:
       m_vbo.bind();
       {
         getBlender().blend();
-        drawFill( camera, mvpApplicator );
         drawOutline( camera, mvpApplicator );
+        drawFill( camera, mvpApplicator );
       }
       // unbind the VBO
       m_vbo.unbind();
@@ -82,6 +89,7 @@ public:
           vertexIndex < m_fillBufferStartIndex;
           ++vertexIndex )
     {
+      auto color = colorizer( vertexIndex );
       setColor( m_vbo, vertexIndex, colorizer( vertexIndex ) );
     }
   }
@@ -94,8 +102,27 @@ public:
           vertexIndex < m_vbo.elementCount();
           ++vertexIndex, ++colorIndex )
     {
+      auto color = colorizer( colorIndex );
       setColor( m_vbo, vertexIndex, colorizer( colorIndex ) );
     }
+  }
+
+  ////////////////////////////////////////////////////////////////////////////////
+  /// PUBLIC:
+  void setTriangleColor( uint8_t index,
+                         const nxColor& colorA,
+                         const nxColor& colorB,
+                         const nxColor& colorC )
+  {
+    assert( index < m_edges );
+    GLData data[ 3 ];
+    m_vbo.getDataRange( NX_IDX_OFFSET, 3, data );
+    {
+      data[ 0 ].color = colorA;
+      data[ 1 ].color = colorB;
+      data[ 2 ].color = colorC;
+    }
+    m_vbo.setDataRange( NX_IDX_OFFSET, 3, data );
   }
 
   ////////////////////////////////////////////////////////////////////////////////
@@ -108,7 +135,8 @@ public:
 
   ////////////////////////////////////////////////////////////////////////////////
   /// PUBLIC:
-  [[nodiscard]] float getOutlinePercentage() const { return m_outlinePercentage; }
+  [[nodiscard]]
+  float getOutlinePercentage() const { return m_outlinePercentage; }
 
 private:
 
@@ -116,10 +144,12 @@ private:
   /// PRIVATE:
   void drawFill( const GLCamera& camera, IMVPApplicator& mvpApplicator )
   {
-    auto mvp = getModel().getTranslation( camera );
+    m_modelFill = getModel();
+    m_modelFill.setScale( m_modelFill.getScale() * ( 1.f - m_outlinePercentage ) );
+    auto mvp = m_modelFill.getTranslation( camera );
     mvpApplicator.applyMVP( mvp );
-
-    GLExec( glDrawArrays( GL_TRIANGLE_FAN, 0, m_fillBufferStartIndex ) );
+    GLExec(
+      glDrawArrays( GL_TRIANGLE_FAN, m_fillBufferStartIndex, m_fillBufferStartIndex ) );
   }
 
   ////////////////////////////////////////////////////////////////////////////////
@@ -128,12 +158,10 @@ private:
   {
     if ( m_outlinePercentage > 0.f )
     {
-      m_modelFill = getModel();
-      m_modelFill.setScale( m_modelFill.getScale() * ( 1.f - m_outlinePercentage ) );
-      auto mvp = m_modelFill.getTranslation( camera );
+      auto mvp = getModel().getTranslation( camera );
       mvpApplicator.applyMVP( mvp );
-      GLExec(
-          glDrawArrays( GL_TRIANGLE_FAN, m_fillBufferStartIndex, m_fillBufferStartIndex ) );
+
+      GLExec( glDrawArrays( GL_TRIANGLE_FAN, 0, m_fillBufferStartIndex ) );
     }
   }
 
@@ -177,7 +205,7 @@ private:
       vertexBuffer[ posInBuffer + 2 ] = { pointC, white };
 
       // assign the fill shape
-      vertexBuffer[ posInBuffer + m_fillBufferStartIndex ]     = { pointA, white };
+      vertexBuffer[ posInBuffer + m_fillBufferStartIndex + 0 ] = { pointA, white };
       vertexBuffer[ posInBuffer + m_fillBufferStartIndex + 1 ] = { pointB, white };
       vertexBuffer[ posInBuffer + m_fillBufferStartIndex + 2 ] = { pointC, white };
 
@@ -199,6 +227,7 @@ private:
   float m_outlinePercentage { 0.f };
 
   uint32_t m_fillBufferStartIndex { 0 };
+  uint8_t m_edges { 0 }; // also the number of triangles
 };
 
 }

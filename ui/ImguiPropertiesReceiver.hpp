@@ -33,9 +33,12 @@ public:
 
                         ImColor( 0.f, 1.f, 0.f, 1.f ) );
 
-    pDrawList->AddCircleFilled( { winPos.x + halfSize.x       , winPos.y + halfSize.y },        5.f, ImColor( 1.f, 0.f, 0.f, 1.f ) );
-    pDrawList->AddCircleFilled( { winPos.x + halfSize.x + size, winPos.y + halfSize.y },        5.f, ImColor( 0.f, 1.f, 0.f, 1.f ) );
-    pDrawList->AddCircleFilled( { winPos.x + halfSize.x       , winPos.y + halfSize.y + size }, 5.f, ImColor( 0.f, 0.f, 1.f, 1.f ) );
+    // this is the 0th triangle
+    pDrawList->AddTriangle( { winPos.x + 640.f       , winPos.y + 384 },
+                            { winPos.x + 640.f       , winPos.y + 284 },
+                            { winPos.x + 740.f       , winPos.y + 384 },
+                            ImColor( 1.f, 0.f, 0.f, 1.f ) );
+
   }
 };
 

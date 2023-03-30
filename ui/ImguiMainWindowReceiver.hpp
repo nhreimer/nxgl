@@ -27,12 +27,12 @@ public:
     nxgl::gfx::IntervalColorizer intervalColorizer;
     intervalColorizer.setColors(
       {
-        // triangle 1
+        // triangle 0
         { 0.f, 0.f, 0.f, 0.f },
         { 0.f, 1.f, 0.f, .5f },
         { 0.f, 1.f, 0.f, .5f },
 
-        // triangle 2
+        // triangle 1
         { 0.f, 0.f, 0.f, 0.f },
         { 0.f, 0.f, 1.f, .5f },
         { 0.f, 0.f, 1.f, .5f }
@@ -48,8 +48,6 @@ public:
     m_hexa.setFillColor( intervalColorizer );
     m_hexa.setOutlineColor( outerColorizer );
     m_hexa.setOutlinePercentage( .1f );
-
-    m_triangle = m_hexa.getTriangle( 0 );
 
     ////////////////////////////////////////////////////////////////////////////////
   }
@@ -81,21 +79,33 @@ public:
       double xpos, ypos;
       glfwGetCursorPos( window, &xpos, &ypos );
 
-      nxVec2 pos { ( float )xpos, ( float )ypos };
+      /////////////////////////////////////////////////////////
+      /// ANNOYANCE                                         ///
+      ///   IMPORTANT: GLFW's y is inverted since           ///
+      ///              OGL's and GLFW's origins differ      ///
+      /// ANNOYANCE                                         ///
+      /////////////////////////////////////////////////////////
+      nxVec2 pos { ( float )xpos, appCtx.windowSize.y - ( float )ypos };
 
       if ( m_pModel->getBounds().contains( pos ) )
       {
-        LOG_DEBUG( "BB clicked!" );
+        LOG_DEBUG( "BB clicked!: {}, {}", pos.x, pos.y );
 
-        if ( nxgl::Math::isPointInTriangle( pos, m_triangle ) )
+        for ( uint8_t i = 0; i < m_hexa.getTriangleCount(); ++i )
         {
-          LOG_DEBUG( "TRIANGLE clicked!" );
-        }
+          auto triangle = m_hexa.getTriangle( i );
+          if ( Math::isPointInTriangle( pos, triangle ) )
+          {
+            LOG_DEBUG( "TRIANGLE {} clicked!", i );
+            m_hexa.setTriangleColor( i, { 0.f, 0.f, 0.f, 0.f },
+                                        { .65f, .65f, .65f, .5f },
+                                        { .75f, .75f, .75f, .5f } );
 
-        LOG_DEBUG( "\tpoint: {}, {}. ", pos.x, pos.y );
-        LOG_DEBUG( "\tA: {}, {}. ", m_triangle.pointA.x, m_triangle.pointA.y );
-        LOG_DEBUG( "\tB: {}, {}. ", m_triangle.pointB.x, m_triangle.pointB.y );
-        LOG_DEBUG( "\tC: {}, {}. ", m_triangle.pointC.x, m_triangle.pointC.y );
+//            LOG_DEBUG( "\tA: {}, {}", triangle.pointA.x, triangle.pointA.y );
+//            LOG_DEBUG( "\tB: {}, {}", triangle.pointB.x, triangle.pointB.y );
+//            LOG_DEBUG( "\tC: {}, {}", triangle.pointC.x, triangle.pointC.y );
+          }
+        }
       }
     }
   }
@@ -103,9 +113,8 @@ public:
 private:
 
   float m_timer { 0.f };
-  nxgl::gfx::GLPolygon m_hexa { GL_DYNAMIC_DRAW, 4 };
+  nxgl::gfx::GLPolygon m_hexa { GL_DYNAMIC_DRAW, 5 };
   nxgl::gfx::GLModel * m_pModel { nullptr };
-  nxgl::gfx::TriangleData m_triangle;
 };
 
 }

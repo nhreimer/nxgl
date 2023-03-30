@@ -11,9 +11,6 @@
 #include "ui/ImguiPropertiesReceiver.hpp"
 #include "gfx/shapes/ShapeShader.hpp"
 
-#include "Tests/TestPrimitives.hpp"
-#include "Tests/TestShaders.hpp"
-
 static GLFWwindow * createWindow(
   uint32_t width,
   uint32_t height,
@@ -137,8 +134,6 @@ int main()
 
   auto * pWindow = createWindow( width, height, "nxgl" );
   runApplication( width, height, pWindow );
-//  runLoop( pWindow );
-//  runLoopShaders( pWindow );
   glfwDestroyWindow( pWindow );
   glfwTerminate();
 
