@@ -87,7 +87,6 @@ private:
   GLVbo< GLData > m_vbo;
 
   GLenum m_glPrimitive;
-
 };
 
 }

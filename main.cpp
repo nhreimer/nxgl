@@ -139,8 +139,7 @@ static void runTest(  uint32_t winWidth,       // initial width
 
   camera.setProjection( { winWidth, winHeight } );
 
-//  vao.bind();
-
+  vao.bind();
   shader.bind();
 
   auto mvpAddress = shader.getUniformAddress( "uMVP" );
@@ -191,21 +190,6 @@ int main()
 //  runTest( width, height, pWindow );
   glfwDestroyWindow( pWindow );
   glfwTerminate();
-
-//  auto vertices = nxgl::gfx::VertexGenerator::createBarycentricPoints( { { -.5f, -.5f  },
-//                                                                         {  .5f, -.5f  },
-//                                                                         {  .0f,  .5f  } } );
-//
-//  for ( const auto& triangle : vertices )
-//  {
-//    LOG_DEBUG( "T: A({}, {}) -> B({}, {}) -> C({}, {})",
-//               triangle.pointA.x,
-//               triangle.pointA.y,
-//               triangle.pointB.x,
-//               triangle.pointB.y,
-//               triangle.pointC.x,
-//               triangle.pointC.y );
-//  }
 
   return 0;
 }

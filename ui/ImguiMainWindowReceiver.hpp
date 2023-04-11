@@ -8,7 +8,8 @@
 #include "gfx/shapes/IMVPApplicator.hpp"
 #include "gfx/shapes/IColorable.hpp"
 
-#include "gfx/shapes/BarycentricGenerator.hpp"
+#include "gfx/shapes/generators/BarycentricGenerator.hpp"
+#include "gfx/shapes/generators/PolygonGenerator.hpp"
 #include "utilities/Math.hpp"
 
 #include "ecs/Components.hpp"
@@ -75,6 +76,15 @@ public:
     auto& shape2 = m_shapes.addShape( GL_TRIANGLES, 3, 3 );
     shape2.getModel().setScale( { 50.f, 50.f } );
     shape2.getModel().setPosition( { 200.f, 50.f } );
+
+    auto& poly1 = m_polys.emplace_back( gfx::NXShape { sm_polygenerator } );
+    poly1.getModel().setScale( { 75.f, 75.f } );
+    poly1.getModel().setPosition( { 200.f, 150.f } );
+
+    sm_polygenerator.setEdges( 5 );
+    auto& poly2 = m_polys.emplace_back( gfx::NXShape { sm_polygenerator } );
+    poly2.getModel().setScale( { 75.f, 75.f } );
+    poly2.getModel().setPosition( { 325.f, 150.f } );
   }
 
   void update( ApplicationContext &appCtx, GLFWwindow *window, const nxTimePoint frameDeltaInMS ) override
@@ -93,6 +103,9 @@ public:
     m_baryBack.draw( appCtx.camera, *appCtx.mvpApplicator );
     m_bary.draw( appCtx.camera, *appCtx.mvpApplicator );
     m_shapes.draw( appCtx.camera, *appCtx.mvpApplicator );
+
+    for ( auto& poly : m_polys )
+      poly.draw( appCtx.camera, *appCtx.mvpApplicator );
   }
 
   void
@@ -131,6 +144,9 @@ private:
   gfx::NXShape m_bary { sm_generator };
   gfx::NXShape m_baryBack { GL_TRIANGLES, sm_vertices };
   gfx::NXSharedShapeContainer m_shapes { sm_vertices };
+  std::vector< gfx::NXShape > m_polys;
+
+  static inline gfx::PolygonGenerator sm_polygenerator { 4 };
 
   static inline gfx::BarycentricGenerator sm_generator { 2, { { -.5f, -.5f },
                                                               {  .5f, -.5f },
