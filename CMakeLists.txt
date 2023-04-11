@@ -8,13 +8,14 @@ set( VCPKG_INCL D:/vcpkg/installed/x64-windows-static-md/include )
 
 add_executable( ${PROJECT_NAME}
   main.cpp
-  D:/projects/glad/v3.3/src/gl.c
-  D:/projects/imgui/imgui.cpp
-  D:/projects/imgui/imgui_draw.cpp
-  D:/projects/imgui/imgui_tables.cpp
-  D:/projects/imgui/imgui_widgets.cpp
-  D:/projects/imgui/backends/imgui_impl_glfw.cpp
-  D:/projects/imgui/backends/imgui_impl_opengl3.cpp
+  ${VENDOR_INCL}/glad/v4.6/src/gl.c
+  #D:/projects/glad/v3.3/src/gl.c
+  ${VENDOR_INCL}/imgui/imgui.cpp
+  ${VENDOR_INCL}/imgui/imgui_draw.cpp
+  ${VENDOR_INCL}/imgui/imgui_tables.cpp
+  ${VENDOR_INCL}/imgui/imgui_widgets.cpp
+  ${VENDOR_INCL}/imgui/backends/imgui_impl_glfw.cpp
+  ${VENDOR_INCL}/imgui/backends/imgui_impl_opengl3.cpp
   )
 
 #####################################################################################
@@ -65,13 +66,14 @@ target_include_directories(
   ${PROJECT_NAME}
   PRIVATE
   ${VCPKG_INCL}
-  ${VENDOR_INCL}/glad/v3.3/include
+  #${VENDOR_INCL}/glad/v3.3/include
+  ${VENDOR_INCL}/glad/v4.6/include
   ${VENDOR_INCL}/imgui/backends
   ${VENDOR_INCL}/bitsery/include
   ${VENDOR_INCL}/spdlog/include
   ${VENDOR_INCL}/imgui
   ${VENDOR_INCL}/json/include
-  ${VENDOR_INCL}/entt
+  ${VENDOR_INCL}/entt/src
   ${VENDOR_INCL}/glm
   ${CMAKE_SOURCE_DIR}
 )

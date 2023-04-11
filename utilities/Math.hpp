@@ -1,7 +1,7 @@
 #ifndef INC_97E6A2BF49EC4FDF8B0B4A07BB9D3675
 #define INC_97E6A2BF49EC4FDF8B0B4A07BB9D3675
 
-#include "gfx/shapes/Triangle.hpp"
+#include "gfx/shapes/NXTriangle.hpp"
 
 namespace nxgl
 {
@@ -17,7 +17,7 @@ public:
   }
 
   // https://stackoverflow.com/questions/2049582/how-to-determine-if-a-point-is-in-a-2d-triangle
-  static bool isPointInTriangle( const nxVec2& pt, const nxgl::gfx::Triangle& triangle )
+  static bool isPointInTriangle( const nxVec2& pt, const nxgl::gfx::NXTriangle& triangle )
   {
     auto d1 = getSign( pt, triangle.pointA, triangle.pointB );
     auto d2 = getSign( pt, triangle.pointB, triangle.pointC );
@@ -29,7 +29,7 @@ public:
     return !( hasNeg && hasPos );
   }
 
-  static nxVec3 getTriangleAngles( const nxgl::gfx::Triangle& triangleData )
+  static nxVec3 getTriangleAngles( const nxgl::gfx::NXTriangle& triangleData )
   //static nxVec3 getTriangleAngles( const nxVec2& a, const nxVec2& b, const nxVec2& c )
   {
     auto lengthA = getLineLength( triangleData.pointB, triangleData.pointC );

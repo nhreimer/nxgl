@@ -59,8 +59,8 @@ public:
 
 private:
 
-  nxgl::nxVec2 m_windowSize { 1.f, 1.f };
-  nxgl::nxVec2 m_viewSize   { 1.f, 1.f };
+  nxgl::nxVec2 m_windowSize { -1.f, 1.f };
+  nxgl::nxVec2 m_viewSize   { -1.f, 1.f };
 
   glm::mat4 m_proj{ glm::ortho( -1.f, 1.f,        // x range
                                 -1.f, 1.f,        // y range

@@ -21,13 +21,13 @@ struct GLBounds
 
   [[nodiscard]] inline bool contains( const nxVec2& point ) const
   {
-    LOG_DEBUG( "point ({}, {}) in bounds ({}, {}) - ({}, {})",
-               point.x,
-               point.y,
-               topLeft.x,
-               topLeft.y,
-               bottomRight.x,
-               bottomRight.y );
+//    LOG_DEBUG( "point ({}, {}) in bounds ({}, {}) - ({}, {})",
+//               point.x,
+//               point.y,
+//               topLeft.x,
+//               topLeft.y,
+//               bottomRight.x,
+//               bottomRight.y );
 
     return point.x >= topLeft.x && point.x <= bottomRight.x &&
            point.y >= topLeft.y && point.y <= bottomRight.y;

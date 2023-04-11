@@ -1,20 +1,35 @@
-#ifndef INC_55B877408AC84A008713A61519B56CC0
-#define INC_55B877408AC84A008713A61519B56CC0
+#ifndef E14BB060A3B642459CC0D57629B21FA9
+#define E14BB060A3B642459CC0D57629B21FA9
 
 namespace nxgl::gfx
 {
-template < GLenum glBufferType, typename TData >
-class GLBuffer
+
+template < typename TData >
+class NXVbo
 {
 public:
 
-  // deleted copy ctor & assignment
-  GLBuffer& operator=( const GLBuffer& ) = delete;
-  GLBuffer( const GLBuffer& ) = delete;
+  // deleted copy ctor and assignment
+  NXVbo( const NXVbo& ) = delete;
+  NXVbo& operator=( const NXVbo& ) = delete;
 
   ////////////////////////////////////////////////////////////////////////////////
-  /// PUBLIC MOVE CTOR
-  GLBuffer( GLBuffer&& other ) noexcept
+  /// PUBLIC CTOR:
+  NXVbo() = default;
+
+  ////////////////////////////////////////////////////////////////////////////////
+  /// PUBLIC DTOR:
+  ~NXVbo()
+  {
+    if ( m_bufferId > 0 )
+    {
+      GLExec( glDeleteBuffers( 1, &m_bufferId ) );
+    }
+  }
+
+  ////////////////////////////////////////////////////////////////////////////////
+  /// PUBLIC MOVE CTOR:
+  NXVbo( NXVbo&& other ) noexcept
   {
     std::swap( m_bufferId, other.m_bufferId );
     m_bufferUsage = other.m_bufferUsage;
@@ -23,8 +38,8 @@ public:
   }
 
   ////////////////////////////////////////////////////////////////////////////////
-  /// PUBLIC MOVE ASSIGNMENT
-  GLBuffer& operator=( GLBuffer&& other ) noexcept
+  /// PUBLIC MOVE ASSIGNMENT:
+  NXVbo& operator=( NXVbo&& other ) noexcept
   {
     std::swap( m_bufferId, other.m_bufferId );
     m_bufferUsage = other.m_bufferUsage;
@@ -33,47 +48,46 @@ public:
   }
 
   ////////////////////////////////////////////////////////////////////////////////
-  /// PUBLIC:
-  GLBuffer( GLenum bufferUsage, GLsizeiptr szBuffer )
-    : GLBuffer( bufferUsage, szBuffer, nullptr )
-  {}
+  /// PUBLIC CTOR:
+  NXVbo( GLenum bufferUsage, uint32_t elements, const TData * pReadBuffer )
+  {
+    generate( bufferUsage, elements, pReadBuffer );
+  }
 
   ////////////////////////////////////////////////////////////////////////////////
   /// PUBLIC:
-  GLBuffer( GLenum bufferUsage, GLsizeiptr szBuffer, const TData * pReadBuffer )
-    : m_bufferUsage( bufferUsage ),
-      m_szBuffer( szBuffer ),
-      m_cntBuffer( szBuffer / sizeof( TData ) )
+  void generate( GLenum bufferUsage, uint32_t elements, const TData * pReadBuffer )
   {
+    m_szBuffer = ( GLsizeiptr )( elements * sizeof( TData ) );
+    m_cntBuffer = ( GLsizeiptr )elements;
+
+    // if this is thrown, then you've already generated the data
+    assert( m_bufferId <= 0 );
+
     // generate the id
     GLExec( glGenBuffers( 1, &m_bufferId ) );
 
     // bind the buffer, so we can set its data
-    GLExec( glBindBuffer( glBufferType, m_bufferId ) );
+    bind();
 
     // write to the GL buffer from the read buffer
-    GLExec( glBufferData( glBufferType, m_szBuffer, pReadBuffer, m_bufferUsage ) );
+    GLExec( glBufferData( GL_ARRAY_BUFFER, m_szBuffer, pReadBuffer, m_bufferUsage ) );
   }
 
   ////////////////////////////////////////////////////////////////////////////////
   /// PUBLIC:
-  virtual ~GLBuffer()
+  inline void bind() const
   {
-    GLExec( glDeleteBuffers( 1, &m_bufferId ) );
+    // if this assert gets thrown, then you forgot to call generate()
+    assert( m_bufferId > 0 );
+    GLExec( glBindBuffer( GL_ARRAY_BUFFER, m_bufferId ) );
   }
 
   ////////////////////////////////////////////////////////////////////////////////
   /// PUBLIC:
-  void bind() const
+  inline void unbind() const
   {
-    GLExec( glBindBuffer( glBufferType, m_bufferId ) );
-  }
-
-  ////////////////////////////////////////////////////////////////////////////////
-  /// PUBLIC:
-  void unbind() const
-  {
-    GLExec( glBindBuffer( glBufferType, 0 ) );
+    GLExec( glBindBuffer( GL_ARRAY_BUFFER, 0 ) );
   }
 
   ////////////////////////////////////////////////////////////////////////////////
@@ -81,7 +95,7 @@ public:
   void fill( const TData * pReadBuffer ) const
   {
     bind();
-    GLExec( glBufferData( glBufferType, m_szBuffer, pReadBuffer, m_bufferUsage ) );
+    GLExec( glBufferData( GL_ARRAY_BUFFER, m_szBuffer, pReadBuffer, m_bufferUsage ) );
   }
 
   ////////////////////////////////////////////////////////////////////////////////
@@ -109,7 +123,7 @@ public:
   {
     bind();
     assert( index * sizeof( TData ) < m_szBuffer );
-    GLExec( glBufferSubData( glBufferType,
+    GLExec( glBufferSubData( GL_ARRAY_BUFFER,
                              ( GLintptr )( sizeof( TData ) * index ),
                              sizeof( TData ),
                              &data ) );
@@ -126,7 +140,7 @@ public:
     assert( posStartByte + szBytes <= m_szBuffer );
 
     GLExec( glGetBufferSubData(
-      glBufferType,
+      GL_ARRAY_BUFFER,
       ( GLintptr )posStartByte,
       ( GLsizeiptr )szBytes,
       pWriteBuffer ) );
@@ -150,7 +164,7 @@ public:
     assert( posStartByte + szBytes <= m_szBuffer );
 
     GLExec( glBufferSubData(
-      glBufferType,
+      GL_ARRAY_BUFFER,
       ( GLintptr )posStartByte,
       ( GLsizeiptr )szBytes,
       pReadBuffer ) );
@@ -178,11 +192,11 @@ private:
 
   GLuint m_bufferId { 0 };
 
-  GLenum m_bufferUsage { GL_ARRAY_BUFFER };
+  GLenum m_bufferUsage { GL_STATIC_DRAW }; // default to this
   GLsizeiptr m_szBuffer { 0 };  // number of bytes in the buffer
   GLsizeiptr m_cntBuffer { 0 }; // number of elements in the buffer
 };
 
 }
 
-#endif //INC_55B877408AC84A008713A61519B56CC0
+#endif //E14BB060A3B642459CC0D57629B21FA9

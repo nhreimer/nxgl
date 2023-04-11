@@ -11,6 +11,8 @@
 #include "ui/ImguiPropertiesReceiver.hpp"
 #include "gfx/shapes/ShapeShader.hpp"
 
+#include "gfx/v2/NXVbo.hpp"
+
 static GLFWwindow * createWindow(
   uint32_t width,
   uint32_t height,
@@ -30,8 +32,8 @@ static GLFWwindow * createWindow(
   const char* glsl_version = "#version 330";
   glfwWindowHint( GLFW_DOUBLEBUFFER, GL_TRUE );
   glfwWindowHint( GLFW_SAMPLES, 4 );
-  glfwWindowHint( GLFW_CONTEXT_VERSION_MAJOR, 3 );
-  glfwWindowHint( GLFW_CONTEXT_VERSION_MINOR, 3 );
+  glfwWindowHint( GLFW_CONTEXT_VERSION_MAJOR, 4 );
+  glfwWindowHint( GLFW_CONTEXT_VERSION_MINOR, 6 );
   glfwWindowHint( GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE );
 
   GLFWwindow* ptrWindow = glfwCreateWindow(
@@ -48,7 +50,8 @@ static GLFWwindow * createWindow(
 
   // have glad load the opengl shit for us. if you forget this, then expect
   // access violation errors
-  if ( gladLoadGL( glfwGetProcAddress ) == 0 )
+  //if ( gladLoadGL( glfwGetProcAddress ) == 0 )
+  if ( gladLoadGL() == 0 )
   {
     LOG_CRITICAL( "failed to initialize opengl context" );
     glfwTerminate();
@@ -84,12 +87,15 @@ static void runApplication( uint32_t width,       // initial width
   nxgl::ui::EventDistributor eventDistributor( distributors );
   nxgl::gfx::ShapeShader defaultShader;
 
+  entt::registry registry;
+
   nxgl::ApplicationContext appCtx;
 
   appCtx.windowSize = { ( float )width, ( float )height };
   appCtx.camera.setProjection( appCtx.windowSize );
   appCtx.eventDistributor = &eventDistributor;
   appCtx.mvpApplicator = ( nxgl::gfx::IMVPApplicator * )&defaultShader;
+  appCtx.pRegistry = &registry;
 
   nxgl::Application application( appCtx, pWindow );
   application.run();
@@ -99,29 +105,79 @@ static void runApplication( uint32_t width,       // initial width
     delete pEventReceiver;
 }
 
-static void generate( uint16_t granularity, float width )
+static void runTest(  uint32_t winWidth,       // initial width
+                      uint32_t winHeight,      // initial height
+                      GLFWwindow * pWindow )
 {
-  std::vector< nxgl::gfx::GLData > buffer;
+  std::vector< nxgl::gfx::GLData > vertices
+    {
+      { { -.5f, -.5f  },  { 1.f, 1.f, 1.f, 1.f } },
+      { {  .5f, -.5f  },  { 1.f, 1.f, 1.f, 1.f } },
+      { {  .0f,  .5f  },  { 1.f, 1.f, 1.f, 1.f } },
 
-  auto angle = nxgl::NX_TAU / ( float )granularity;
+      { { -.5f, -.5f  },  { 1.f, 0.f, 0.f, 1.f } },
+      { {  .5f, -.5f  },  { 1.f, 1.f, 1.f, 1.f } },
+      { {  .0f,  .5f  },  { 1.f, 0.f, 1.f, 1.f } }
+    };
 
-  auto vertexAngle = 0.f;
+  nxgl::gfx::GLVao vao;
+  nxgl::gfx::NXVbo< nxgl::gfx::GLData > vbo;
+  vbo.generate( GL_STATIC_DRAW, vertices.size(), vertices.data() );
+  nxgl::gfx::GLData::setDataLayout( vao );
+  nxgl::gfx::GLShader shader;
+  assert( shader.loadShader( GL_VERTEX_SHADER  , "resources/DefaultVertex.glsl"   ) );
+  assert( shader.loadShader( GL_FRAGMENT_SHADER, "resources/DefaultFragment.glsl" ) );
+  assert( shader.link() );
 
-  for ( uint16_t i = 0; i < granularity; ++i )
+  nxgl::gfx::GLCamera camera;
+  nxgl::gfx::GLModel objectModel1;
+  nxgl::gfx::GLModel objectModel2;
+
+  objectModel1.setScale( { 100.f, 100.f } );
+  objectModel1.setPosition( { ( float )winWidth / 2.f, ( float )winHeight / 2.f } );
+
+  objectModel2.setScale( { 100.f, 100.f } );
+  objectModel2.setPosition( { ( float )winWidth / 2.f - 200.f, ( float )winHeight / 2.f } );
+
+  camera.setProjection( { winWidth, winHeight } );
+
+//  vao.bind();
+
+  shader.bind();
+
+  auto mvpAddress = shader.getUniformAddress( "uMVP" );
+
+  nxgl::Clock clock;
+  while ( !glfwWindowShouldClose( pWindow ) )
   {
-    // outer one
-    buffer.push_back( { { std::cos( angle ) * width, std::sin( angle ) * width },
-                        { 1.f, 1.f, 1.f, 1.f } } );
+    glfwPollEvents();
 
-    // inner one
-    buffer.push_back( { { std::cos( angle ), std::sin( angle ) },
-                        { 1.f, 1.f, 1.f, 1.f } } );
+    int width, height;
+    glfwGetFramebufferSize( pWindow, &width, &height );
+    glViewport( 0, 0, width, height );
+    glClearColor( .15f, .15f, .15f, 1.f );
+    glClear( GL_COLOR_BUFFER_BIT );
 
-    vertexAngle = angle * ( float )i;
+    auto mvp = objectModel1.getTranslation( camera );
+    shader.setUniformMatrix( mvpAddress, mvp );
+    GLExec( glDrawArrays( GL_TRIANGLES, 0, 3 ) );
 
-    // 2nd outer one
-    buffer.push_back( { { std::cos( angle ) * width, std::sin( angle ) * width },
-                        { 1.f, 1.f, 1.f, 1.f } } );
+    if ( clock.getMilliseconds() >= 75.f )
+    {
+      objectModel2.setAngle( objectModel2.getAngle() - 1.f );
+      clock.reset();
+    }
+
+    mvp = objectModel2.getTranslation( camera );
+    shader.setUniformMatrix( mvpAddress, mvp );
+    GLExec( glDrawArrays( GL_TRIANGLES, 3, 3 ) );
+
+//    model.setScale( { 80, 80 } );
+//    mvp = model.getTranslation( camera );
+//    shader.setUniformMatrix( mvpAddress, mvp );
+//    GLExec( glDrawArrays( GL_TRIANGLES, 3, 3 ) );
+
+    GLExec( glfwSwapBuffers( pWindow ) );
   }
 }
 
@@ -134,8 +190,24 @@ int main()
 
   auto * pWindow = createWindow( width, height, "nxgl" );
   runApplication( width, height, pWindow );
+//  runTest( width, height, pWindow );
   glfwDestroyWindow( pWindow );
   glfwTerminate();
+
+//  auto vertices = nxgl::gfx::VertexGenerator::createBarycentricPoints( { { -.5f, -.5f  },
+//                                                                         {  .5f, -.5f  },
+//                                                                         {  .0f,  .5f  } } );
+//
+//  for ( const auto& triangle : vertices )
+//  {
+//    LOG_DEBUG( "T: A({}, {}) -> B({}, {}) -> C({}, {})",
+//               triangle.pointA.x,
+//               triangle.pointA.y,
+//               triangle.pointB.x,
+//               triangle.pointB.y,
+//               triangle.pointC.x,
+//               triangle.pointC.y );
+//  }
 
   return 0;
 }

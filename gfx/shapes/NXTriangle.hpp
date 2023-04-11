@@ -5,7 +5,7 @@
 
 namespace nxgl::gfx
 {
-struct Triangle
+struct NXTriangle
 {
   nxVec2 pointA;
   nxVec2 pointB;

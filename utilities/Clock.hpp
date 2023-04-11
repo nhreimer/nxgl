@@ -12,7 +12,10 @@ class Clock
 {
 public:
 
-  Clock() = default;
+  Clock()
+  {
+    reset();
+  }
 
   [[maybe_unused]] float reset()
   {

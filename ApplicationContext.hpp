@@ -1,6 +1,8 @@
 #ifndef INC_8BF8F887574143C09FEC0B4499E4E454
 #define INC_8BF8F887574143C09FEC0B4499E4E454
 
+#include <entt/entt.hpp>
+
 namespace nxgl::ui
 {
   class EventDistributor;
@@ -9,6 +11,7 @@ namespace nxgl::ui
 namespace nxgl::gfx
 {
   struct IMVPApplicator;
+  class GLPolygon;
 }
 
 namespace nxgl
@@ -33,6 +36,9 @@ struct ApplicationContext
   // this should either be a shader or transform that actually applies it when drawing
   // see ShapeShader as an example
   nxgl::gfx::IMVPApplicator * mvpApplicator { nullptr };
+
+  // registry for current scene lookups
+  entt::registry * pRegistry { nullptr };
 };
 
 }

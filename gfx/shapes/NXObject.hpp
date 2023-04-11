@@ -1,15 +1,27 @@
 #ifndef AC6F85897BD04631A72189EA9E24083C
 #define AC6F85897BD04631A72189EA9E24083C
 
+#include "gfx/Primitives.hpp"
+
+#include "gfx/shapes/IMVPApplicator.hpp"
+#include "gfx/shapes/IGenerator.hpp"
+
+#include "gfx/v2/NXVbo.hpp"
+
+#include <vector>
+
 namespace nxgl::gfx
 {
 
 /***
  * base object for any object that is drawable and can be manipulated
  */
-class GLObject
+class NXObject
 {
 public:
+
+  NXObject() = default;
+  virtual ~NXObject() = default;
 
   ////////////////////////////////////////////////////////////////////////////////
   /// PUBLIC:
@@ -30,21 +42,6 @@ public:
   ////////////////////////////////////////////////////////////////////////////////
   /// PUBLIC:
   virtual void draw( const GLCamera& camera, IMVPApplicator& mvpApplicator ) = 0;
-
-  ////////////////////////////////////////////////////////////////////////////////
-  /// PUBLIC:
-  static void setColor( const GLVbo< GLData >& vbo, uint32_t index, const nxgl::nxColor& color )
-  {
-    assert( sizeof( GLData ) * index + sizeof( nxgl::nxVec2 ) < vbo.size() );
-
-    vbo.bind();
-
-    GLExec( glBufferSubData(
-      GL_ARRAY_BUFFER,
-      ( GLintptr )( sizeof( GLData ) * index + sizeof( nxgl::nxVec2 ) ),
-      sizeof( nxgl::nxColor ),
-      &color ) );
-  }
 
 private:
 

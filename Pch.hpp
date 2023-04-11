@@ -1,6 +1,10 @@
 #ifndef AED01F84CC4543D2B49267D9DC1D6102
 #define AED01F84CC4543D2B49267D9DC1D6102
 
+#if defined(_WIN32)
+#include <Windows.h>
+#endif
+
 #include <imgui.h>
 #include <imgui_impl_glfw.h>
 #include <imgui_impl_opengl3.h>

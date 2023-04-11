@@ -34,11 +34,18 @@ struct GLData
     return { position, { 1.f, 1.f, 1.f, 1.f } };
   }
 
-  /// used for telling OpenGL how the VBO data layout is
-  /// \return
   static GLVao createVAO()
   {
     GLVao vao;
+    setDataLayout( vao );
+    return std::move( vao );
+  }
+
+  /// used for telling OpenGL how the VBO data layout is
+  /// \return
+  static void setDataLayout( GLVao& vao )
+  {
+    // if errors arise here related to 502, then see the note in GLVao ctor
     vao.bind();
 
     // set POSITION
@@ -60,8 +67,6 @@ struct GLData
       sizeof( GLData ),
       ( const GLvoid * )sizeof( nxgl::nxVec2 ) ) );  // offset past the x, y position
     GLExec( glEnableVertexAttribArray( 1 ) );
-
-    return vao;
   }
 };
 
