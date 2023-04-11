@@ -1,8 +1,9 @@
 #ifndef D49F5B9FB4E9483C8DE2C0371A3E5B3D
 #define D49F5B9FB4E9483C8DE2C0371A3E5B3D
 
-#include "gfx/v2/NXVbo.hpp"
+#include "gfx/primitives/GLVbo.hpp"
 #include "gfx/shapes/NXShape.hpp"
+#include "gfx/shapes/NXSharedShapeContainer.hpp"
 
 #include "gfx/shapes/IMVPApplicator.hpp"
 #include "gfx/shapes/IColorable.hpp"

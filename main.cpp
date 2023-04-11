@@ -9,9 +9,7 @@
 #include "ui/ImguiPerformanceReceiver.hpp"
 #include "ui/ImguiMainWindowReceiver.hpp"
 #include "ui/ImguiPropertiesReceiver.hpp"
-#include "gfx/shapes/ShapeShader.hpp"
-
-#include "gfx/v2/NXVbo.hpp"
+#include "gfx/shapes/NXDefaultShader.hpp"
 
 static GLFWwindow * createWindow(
   uint32_t width,
@@ -85,7 +83,7 @@ static void runApplication( uint32_t width,       // initial width
     };
 
   nxgl::ui::EventDistributor eventDistributor( distributors );
-  nxgl::gfx::ShapeShader defaultShader;
+  nxgl::gfx::NXDefaultShader defaultShader;
 
   entt::registry registry;
 
@@ -121,7 +119,7 @@ static void runTest(  uint32_t winWidth,       // initial width
     };
 
   nxgl::gfx::GLVao vao;
-  nxgl::gfx::NXVbo< nxgl::gfx::GLData > vbo;
+  nxgl::gfx::GLVbo< nxgl::gfx::GLData > vbo;
   vbo.generate( GL_STATIC_DRAW, vertices.size(), vertices.data() );
   nxgl::gfx::GLData::setDataLayout( vao );
   nxgl::gfx::GLShader shader;

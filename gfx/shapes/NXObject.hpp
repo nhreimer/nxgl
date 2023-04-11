@@ -6,7 +6,7 @@
 #include "gfx/shapes/IMVPApplicator.hpp"
 #include "gfx/shapes/IGenerator.hpp"
 
-#include "gfx/v2/NXVbo.hpp"
+#include "gfx/primitives/GLVbo.hpp"
 
 #include <vector>
 

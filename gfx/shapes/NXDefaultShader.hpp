@@ -1,14 +1,11 @@
-#ifndef INC_02A5D73CA146472D848737B73202DF3B
-#define INC_02A5D73CA146472D848737B73202DF3B
+#ifndef INC_85E6BEE922664348868A60D1D3D6B200
+#define INC_85E6BEE922664348868A60D1D3D6B200
 
 #include "gfx/shapes/IMVPApplicator.hpp"
 
 namespace nxgl::gfx
 {
-/***
- * this is the default shader for all Polygon-related shapes
- */
-class ShapeShader : public IMVPApplicator
+class NXDefaultShader : public IMVPApplicator
 {
 public:
 
@@ -58,4 +55,4 @@ private:
 };
 }
 
-#endif //INC_02A5D73CA146472D848737B73202DF3B
+#endif //INC_85E6BEE922664348868A60D1D3D6B200

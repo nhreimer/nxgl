@@ -34,7 +34,7 @@ struct ApplicationContext
 
   // this applies the model, view, projection to an object.
   // this should either be a shader or transform that actually applies it when drawing
-  // see ShapeShader as an example
+  // see NXDefaultShader as an example
   nxgl::gfx::IMVPApplicator * mvpApplicator { nullptr };
 
   // registry for current scene lookups

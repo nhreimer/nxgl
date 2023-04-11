@@ -3,10 +3,8 @@
 
 #include "gfx/primitives/GLUtility.hpp"
 #include "gfx/primitives/GLData.hpp"
-#include "gfx/primitives/GLBuffer.hpp"
-#include "gfx/primitives/GLVbo.hpp"
-#include "gfx/primitives/GLIbo.hpp"
 #include "gfx/primitives/GLVao.hpp"
+#include "gfx/primitives/GLVbo.hpp"
 #include "gfx/primitives/GLShader.hpp"
 #include "gfx/primitives/GLFbo.hpp"
 #include "gfx/primitives/GLBlend.hpp"
