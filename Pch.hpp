@@ -10,6 +10,8 @@
 #include <imgui_impl_opengl3.h>
 
 #include <cstdint>
+#include <algorithm>
+#include <string>
 
 //#include "Logger.hpp"
 

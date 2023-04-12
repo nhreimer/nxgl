@@ -1,6 +1,10 @@
 #ifndef A94932B275BE4A84A2ACBB1363AE5C4C
 #define A94932B275BE4A84A2ACBB1363AE5C4C
 
+#include <glm/vec2.hpp>
+#include <glm/vec3.hpp>
+#include <glm/vec4.hpp>
+
 namespace nxgl
 {
 

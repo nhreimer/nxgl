@@ -1,7 +1,10 @@
 #ifndef E4701D3F8E3B42E88AEDDF6A67AF66E4
 #define E4701D3F8E3B42E88AEDDF6A67AF66E4
 
+#include "Pch.hpp"
+
 #include "utilities/Definitions.hpp"
+#include "gfx/primitives/GLUtility.hpp"
 
 namespace nxgl::gfx
 {

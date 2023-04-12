@@ -1,30 +1,18 @@
 #ifndef CC3F21C5E8404D4B956540A39128F6C7
 #define CC3F21C5E8404D4B956540A39128F6C7
 
+#include "Pch.hpp"
+
 #include <format>
+#include "Logger.hpp"
 
 namespace nxgl::gfx
 {
 class OpenGLUtility
 {
 public:
-  static void GLClearErrors()
-  {
-    while ( glGetError() != GL_NO_ERROR );
-  }
-
-  static bool GLLog( const char * function, const char * file, int line )
-  {
-    GLenum error = glGetError();
-
-    if ( error )
-    {
-      LOG_ERROR( "[OpenGL][{}]: {} in {}:{}", std::format( "{:x}", error ), function, file, line );
-      return false;
-    }
-
-    return true;
-  }
+  static void GLClearErrors();
+  static bool GLLog( const char * function, const char * file, int line );
 };
 }
 

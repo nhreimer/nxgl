@@ -9,13 +9,25 @@ set( VCPKG_INCL D:/vcpkg/installed/x64-windows-static-md/include )
 add_executable( ${PROJECT_NAME}
   main.cpp
   ${VENDOR_INCL}/glad/v4.6/src/gl.c
-  #D:/projects/glad/v3.3/src/gl.c
   ${VENDOR_INCL}/imgui/imgui.cpp
   ${VENDOR_INCL}/imgui/imgui_draw.cpp
   ${VENDOR_INCL}/imgui/imgui_tables.cpp
   ${VENDOR_INCL}/imgui/imgui_widgets.cpp
   ${VENDOR_INCL}/imgui/backends/imgui_impl_glfw.cpp
   ${VENDOR_INCL}/imgui/backends/imgui_impl_opengl3.cpp
+
+  # gfx/primitives
+  ${CMAKE_SOURCE_DIR}/gfx/primitives/GLData.cpp
+  ${CMAKE_SOURCE_DIR}/gfx/primitives/GLShader.cpp
+  ${CMAKE_SOURCE_DIR}/gfx/primitives/GLUtility.cpp
+
+  # gfx/shapes
+  ${CMAKE_SOURCE_DIR}/gfx/shapes/NXDefaultShader.cpp
+  ${CMAKE_SOURCE_DIR}/gfx/shapes/NXShape.cpp
+  ${CMAKE_SOURCE_DIR}/gfx/shapes/NXSharedShape.cpp
+  ${CMAKE_SOURCE_DIR}/gfx/shapes/NXSharedShapeContainer.cpp
+
+
   )
 
 #####################################################################################

@@ -42,27 +42,27 @@ public:
 
   ////////////////////////////////////////////////////////////////////////////////
   /// PUBLIC:
-  [[nodiscard]] nxgl::nxVec2 getScale() const { return { m_scale.x, m_scale.y }; }
+  [[nodiscard]] inline nxgl::nxVec2 getScale() const { return { m_scale.x, m_scale.y }; }
 
   ////////////////////////////////////////////////////////////////////////////////
   /// PUBLIC:
   ///
   /// \param angle in degrees
-  void setAngle( float angle ) { m_angle = angle; }
+  inline void setAngle( float angle ) { m_angle = angle; }
 
   ////////////////////////////////////////////////////////////////////////////////
   /// PUBLIC:
   ///
   /// \return angle in degrees
-  [[nodiscard]] float getAngle() const { return m_angle; }
+  [[nodiscard]] inline float getAngle() const { return m_angle; }
 
   ////////////////////////////////////////////////////////////////////////////////
   /// PUBLIC:
-  void setOrigin( const nxgl::nxVec2& origin ) { m_origin = { origin, 1.f }; }
+  inline void setOrigin( const nxgl::nxVec2& origin ) { m_origin = { origin, 1.f }; }
 
   ////////////////////////////////////////////////////////////////////////////////
   /// PUBLIC:
-  [[nodiscard]] nxgl::nxVec2 getOrigin() const { return { m_origin.x, m_origin.y }; }
+  [[nodiscard]] inline nxgl::nxVec2 getOrigin() const { return { m_origin.x, m_origin.y }; }
 
   ////////////////////////////////////////////////////////////////////////////////
   /// PUBLIC:
