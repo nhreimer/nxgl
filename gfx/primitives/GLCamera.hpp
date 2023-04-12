@@ -19,7 +19,7 @@ public:
   {
     m_windowSize = windowSize;
     m_proj = glm::ortho( 0.f, windowSize.x,
-                         0.f, windowSize.y,
+                         -windowSize.y, 0.f,
                          -1.f, 1.f );
   }
 

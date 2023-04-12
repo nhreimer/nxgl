@@ -7,10 +7,13 @@
 namespace nxgl::gfx
 {
 
+
 class NXShape : public NXObject
 {
 
 public:
+
+  NXShape() = default;
 
   explicit NXShape( IGenerator& generator );
   NXShape( GLenum glPrimitive, const std::vector< GLData >& buffer );

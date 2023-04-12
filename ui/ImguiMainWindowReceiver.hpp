@@ -64,27 +64,27 @@ public:
 
     m_bary.setColor( intervalEvenColorizer );
     m_bary.getModel().setScale( { 100.f, 100.f } );
-    m_bary.getModel().setPosition( { appCtx.windowSize.x / 2.f, appCtx.windowSize.y / 2.f } );
+    m_bary.getModel().setPosition( { appCtx.windowSize.x / 2.f, -appCtx.windowSize.y / 2.f } );
 
     m_baryBack.getModel().setScale( { 100.f, 100.f } );
-    m_baryBack.getModel().setPosition( { appCtx.windowSize.x / 2.f, appCtx.windowSize.y / 2.f } );
+    m_baryBack.getModel().setPosition( { appCtx.windowSize.x / 2.f, -appCtx.windowSize.y / 2.f } );
 
     auto& shape = m_shapes.addShape( GL_TRIANGLES, 0, 3 );
     shape.getModel().setScale( { 50.f, 50.f } );
-    shape.getModel().setPosition( { 50.f, 50.f } );
+    shape.getModel().setPosition( { 50.f, -50.f } );
 
     auto& shape2 = m_shapes.addShape( GL_TRIANGLES, 3, 3 );
     shape2.getModel().setScale( { 50.f, 50.f } );
-    shape2.getModel().setPosition( { 200.f, 50.f } );
+    shape2.getModel().setPosition( { 200.f, -50.f } );
 
     auto& poly1 = m_polys.emplace_back( gfx::NXShape { sm_polygenerator } );
     poly1.getModel().setScale( { 75.f, 75.f } );
-    poly1.getModel().setPosition( { 200.f, 150.f } );
+    poly1.getModel().setPosition( { 200.f, -150.f } );
 
     sm_polygenerator.setEdges( 5 );
     auto& poly2 = m_polys.emplace_back( gfx::NXShape { sm_polygenerator } );
     poly2.getModel().setScale( { 75.f, 75.f } );
-    poly2.getModel().setPosition( { 325.f, 150.f } );
+    poly2.getModel().setPosition( { 325.f, -150.f } );
   }
 
   void update( ApplicationContext &appCtx, GLFWwindow *window, const nxTimePoint frameDeltaInMS ) override
@@ -128,8 +128,8 @@ public:
       /////////////////////////////////////////////////////////
       //nxVec2 pos { ( float )xpos, appCtx.windowSize.y - ( float )ypos };
 
-      // this is due to OpenGL's fragment shader layout
-      nxVec2 pos { ( float )xpos, ( float )ypos };
+      nxVec2 pos { ( float )xpos, ( float )-ypos };
+      LOG_DEBUG( "{}, {}", pos.x, pos.y );
       if ( m_bary.getModel().getBounds().contains( pos ) )
       {
         LOG_DEBUG( "you clicked it!" );

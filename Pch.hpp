@@ -1,6 +1,8 @@
 #ifndef AED01F84CC4543D2B49267D9DC1D6102
 #define AED01F84CC4543D2B49267D9DC1D6102
 
+//TODO: this is not actually a precompiled header. there are some issues with CMake and glad + WinAPI to resolve
+
 #if defined(_WIN32)
 #include <Windows.h>
 #endif

@@ -12,6 +12,8 @@ public:
                GLFWwindow* window,
                const nxTimePoint frameDeltaInMS ) override
   {
+    drawBoundingBox( appCtx, window );
+
     static float f = 0.0f;
 
     ImGui::Begin( "Performance" );
@@ -35,7 +37,7 @@ private:
     auto winSize = appCtx.windowSize;
 
     pDrawList->AddRect( { winPos.x + winSize.x / 2.f, winPos.y + winSize.y / 2.f },
-                        { winPos.x + winSize.x / 2.f + 100.f, winPos.y + winSize.y / 2.f + 100.f },
+                        { winPos.x + winSize.x / 2.f + 100.f, winPos.y + winSize.y / 2.f - 100.f },
                         ImColor( 0.f, 1.f, 0.f, 1.f ) );
   }
 

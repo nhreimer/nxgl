@@ -78,7 +78,6 @@ target_include_directories(
   ${PROJECT_NAME}
   PRIVATE
   ${VCPKG_INCL}
-  #${VENDOR_INCL}/glad/v3.3/include
   ${VENDOR_INCL}/glad/v4.6/include
   ${VENDOR_INCL}/imgui/backends
   ${VENDOR_INCL}/bitsery/include
@@ -95,12 +94,6 @@ target_include_directories(
 # PRECOMPILED HEADERS
 #
 #####################################################################################
-target_precompile_headers( ${PROJECT_NAME}
-  PUBLIC
-# adding gl.c to the executable and using a precompiled header
-# causes funky c++ std errors
-#  Pch.hpp
-  )
 
 target_link_libraries( ${PROJECT_NAME}
   PRIVATE

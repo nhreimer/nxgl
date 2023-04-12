@@ -18,6 +18,7 @@ nxgl::gfx::NXShape::NXShape( nxgl::gfx::IGenerator &generator )
   auto elementCount = generator.generate( buffer );
   m_vbo.generate( GL_DYNAMIC_DRAW, elementCount, buffer.data() );
   GLData::setDataLayout( m_vao );
+
 }
 
 ////////////////////////////////////////////////////////////////////////////////
